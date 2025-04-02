@@ -6,7 +6,7 @@ import Gallery from "@/assets/images/gallery.png";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 
-const Home = () => {
+const FamilyMembers = () => {
   const features = [
     {
       id: 1,
@@ -69,32 +69,17 @@ const Home = () => {
   return (
     <div className="bg-gray-100">
       {/* Hero Section */}
-      <div className="text-white text-center banner-images header-banner">
+      <div className="text-white text-center inner-banner">
         <Header />
-        <div className="flex h-full justify-center items-center">
-          <div className="p-8 rounded-lg shadow-lg">
-            <h1 className="text-4xl md:text-5xl font-bold leading-[58px] shadow-md">
-              DISCOVER & BUILD YOUR <br /> FAMILY LEGACY
+        <div className="flex justify-center items-center">
+            <h1 className="text-2xl md:text-5xl font-bold shadow-md">
+              FAMILY MEMBERS
             </h1>
-            <p className="mt-4 text-shadow">
-              Bring your family's history to life. Track generations, celebrate
-              relationships, and preserve <br />
-              precious memories—all in one beautifully crafted family tree.
-            </p>
-            <div className="mt-6 space-x-4">
-              <Link
-                href="/familymembers"
-                className="bg-white text-black p-4 rounded-full text-sm shadow-md"
-              >
-                View Family Members
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
 
       <section className="py-16 px-4 container mx-auto">
-        <h2 className="text-3xl md:text-4xl font-semibold text-green-700 text-center mb-12">
+        <h2 className="text-3xl font-semibold text-green-700 text-center mb-12">
           About the Family Tree
         </h2>
 
@@ -190,9 +175,7 @@ const Home = () => {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-800">{g.title}</h4>
-                    <p className="text-sm text-gray-700">
-                      {g.description}
-                    </p>
+                    <p className="text-sm text-gray-700">{g.description}</p>
                   </div>
                 </div>
               ))}
@@ -215,4 +198,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default FamilyMembers;
