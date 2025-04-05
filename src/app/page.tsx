@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import Welcome from "@/assets/images/welcome.png";
@@ -5,8 +7,9 @@ import HandIcon from "@/assets/images/hand-icon.png";
 import Gallery from "@/assets/images/gallery.png";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
-
+import { useRouter } from "next/navigation";
 const Home = () => {
+  const router = useRouter();
   const features = [
     {
       id: 1,
@@ -65,7 +68,9 @@ const Home = () => {
       icon: HandIcon,
     },
   ];
-
+  const handlegallary = () => {
+    router.push("/familygallary");
+  }
   return (
     <div className="bg-gray-100">
       {/* Hero Section */}
@@ -77,9 +82,7 @@ const Home = () => {
               DISCOVER & BUILD YOUR <br /> FAMILY LEGACY
             </h1>
             <p className="mt-4 text-shadow">
-              Bring your family's history to life. Track generations, celebrate
-              relationships, and preserve <br />
-              precious memories—all in one beautifully crafted family tree.
+              {"Bring your family's history to life. Track generations, celebrate relationships, and preserve <br /> recious memories—all in one beautifully crafted family tree."}
             </p>
             <div className="mt-6 space-x-4">
               <Link
@@ -92,24 +95,18 @@ const Home = () => {
           </div>
         </div>
       </div>
-
       <section className="py-16 px-4 container mx-auto">
         <h2 className="text-3xl md:text-4xl font-semibold text-green-700 text-center mb-12">
           About the Family Tree
         </h2>
-
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <h3 className="text-xl font-bold mb-4">
-              Preserve Your Family's Legacy for Generations to Come.
+              {"  Preserve Your Family's Legacy for Generations to Come."}
             </h3>
             <p className="text-gray-700 mb-8">
-              Every family has a story worth telling. With our Family Tree
-              platform, you can bring your family's history to life—track
-              generations, celebrate bonds, and ensure your legacy lives on for
-              the future.
+              {"Every family has a story worth telling. With our Family Tree  platform, you can bring your family's history to life—track generations, celebrate bonds, and ensure your legacy lives on for the future."}
             </p>
-
             <div className="space-y-4">
               {features.map((feature) => (
                 <div
@@ -135,7 +132,6 @@ const Home = () => {
                 </div>
               ))}
             </div>
-
             <div className="mt-8">
               <Link
                 href="/family-members"
@@ -145,18 +141,15 @@ const Home = () => {
               </Link>
             </div>
           </div>
-
           <div>
             <Image src={Welcome} alt="Family gathering at ancestral house" />
           </div>
         </div>
       </section>
-
       <section className="py-16 px-4 container mx-auto">
         <h2 className="text-3xl md:text-4xl font-semibold text-green-700 text-center mb-12">
           Explore Family Gallery
         </h2>
-
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <Image src={Gallery} alt="Family gathering at ancestral house" />
@@ -166,12 +159,8 @@ const Home = () => {
               Explore Your Family’s Timeless Moments.
             </h3>
             <p className="text-gray-700 mb-8">
-              Every photograph tells a story, every memory holds a legacy. The
-              Family Gallery is a place where you can store, explore, and share
-              your family's precious moments. From childhood snapshots to grand
-              celebrations, keep your memories alive for generations to come.
+              {"  Every photograph tells a story, every memory holds a legacy. The Family Gallery is a place where you can store, explore, and share your family's precious moments. From childhood snapshots to grand celebrations, keep your memories alive for generations to come."}
             </p>
-
             <div className="space-y-4">
               {gallery.map((g) => (
                 <div
@@ -197,22 +186,19 @@ const Home = () => {
                 </div>
               ))}
             </div>
-
             <div className="mt-8">
-              <Link
-                href="/family-members"
+              <div
+                onClick={handlegallary}
                 className="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-full transition duration-300"
               >
                 View Gallery
-              </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
-
       <Footer />
     </div>
   );
 };
-
 export default Home;

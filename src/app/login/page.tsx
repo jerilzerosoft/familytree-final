@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+
 import Email from "@/assets/images/mail-icon.png";
 import Password from "@/assets/images/password-icon.png";
 

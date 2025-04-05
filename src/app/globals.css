@@ -24,7 +24,7 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    width: 100vw;
+    /* width: 100vw; */
     height: 35vh;
 }
 
@@ -37,7 +37,16 @@
   align-items: center;
   justify-content: center;
 }
+.header-icon-search{
+  height: 46px;
+  width: 46px;
+  border-radius: 100px;
+  background-color: #ffffff;
+  display: flex;
 
+  align-items: center;
+  justify-content: center;
+}
 .social-media-icons {
   height: 43px;
   width: 43px;
@@ -65,5 +74,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }

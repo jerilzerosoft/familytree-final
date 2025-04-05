@@ -1,12 +1,15 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
 import Welcome from "@/assets/images/welcome.png";
 import HandIcon from "@/assets/images/hand-icon.png";
 import Gallery from "@/assets/images/gallery.png";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
+import { useRouter } from "next/navigation";
 
 const FamilyMembers = () => {
+  const router = useRouter();
   const features = [
     {
       id: 1,
@@ -66,15 +69,20 @@ const FamilyMembers = () => {
     },
   ];
 
+
+  const handlegallary = () => {
+    router.push("/familygallary");
+  }
+
   return (
     <div className="bg-gray-100">
       {/* Hero Section */}
       <div className="text-white text-center inner-banner">
         <Header />
         <div className="flex justify-center items-center">
-            <h1 className="text-2xl md:text-5xl font-bold shadow-md">
-              FAMILY MEMBERS
-            </h1>
+          <h1 className="text-2xl md:text-5xl font-bold shadow-md">
+            FAMILY MEMBERS
+          </h1>
         </div>
       </div>
 
@@ -86,13 +94,10 @@ const FamilyMembers = () => {
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <h3 className="text-xl font-bold mb-4">
-              Preserve Your Family's Legacy for Generations to Come.
+              {"  Preserve Your Family's Legacy for Generations to Come."}
             </h3>
             <p className="text-gray-700 mb-8">
-              Every family has a story worth telling. With our Family Tree
-              platform, you can bring your family's history to life—track
-              generations, celebrate bonds, and ensure your legacy lives on for
-              the future.
+              {"Every family has a story worth telling. With our Family Tree  platform, you can bring your family's history to life—track generations, celebrate bonds, and ensure your legacy lives on for the future."}
             </p>
 
             <div className="space-y-4">
@@ -122,12 +127,12 @@ const FamilyMembers = () => {
             </div>
 
             <div className="mt-8">
-              <Link
-                href="/family-members"
+              <div
+                // href="/family-members"
                 className="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-full transition duration-300"
               >
                 View Family Tree
-              </Link>
+              </div>
             </div>
           </div>
 
@@ -151,10 +156,7 @@ const FamilyMembers = () => {
               Explore Your Family’s Timeless Moments.
             </h3>
             <p className="text-gray-700 mb-8">
-              Every photograph tells a story, every memory holds a legacy. The
-              Family Gallery is a place where you can store, explore, and share
-              your family's precious moments. From childhood snapshots to grand
-              celebrations, keep your memories alive for generations to come.
+              {"  Every photograph tells a story, every memory holds a legacy. The Family Gallery is a place where you can store, explore, and share your family's precious moments. From childhood snapshots to grand celebrations, keep your memories alive for generations to come."}
             </p>
 
             <div className="space-y-4">
@@ -182,12 +184,12 @@ const FamilyMembers = () => {
             </div>
 
             <div className="mt-8">
-              <Link
-                href="/family-members"
+              <div
+                onClick={handlegallary}
                 className="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-full transition duration-300"
               >
                 View Gallery
-              </Link>
+              </div>
             </div>
           </div>
         </div>
