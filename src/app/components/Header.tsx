@@ -76,39 +76,51 @@ export default function Header() {
         <div 
   ref={searchContainerRef}
   className={`flex items-center transition-all duration-300 ease-in-out overflow-hidden ${
-    isSearchOpen ? "bg-white rounded-full shadow-md" : "bg-transparent"
+    isSearchOpen ? "bg-white rounded-full shadow-md px-2" : "bg-transparent"
   }`}
 >
-  <div 
-    className={`header-icon-search flex items-center justify-center cursor-pointer ${
-      isSearchOpen ? "bg-green-500 w-0 text-white" : "hover:bg-white/20" 
-    }  rounded-full transition-all text-black duration-300`}
-    onClick={handleSearch}
-  >
-    <Image
-  src={Search}
-  alt="Search Icon"
-  {...(!isSearchOpen && { width: 24, height: 24 })}
-  className={`
-    transition-transform duration-300
-    ${isSearchOpen ? "w-0 hidden invert" : ""}
-  `}
-/>
+  {/* Close X Icon - Only when search is open */}
+  {isSearchOpen && (
+    <div
+      className="flex items-center justify-center cursor-pointer text-black"
+      onClick={() => {
+        setIsSearchOpen(false);
+        if (searchInputRef.current) {
+          searchInputRef.current.value = "";
+        }
+      }}
+    >
+      ✕
+    </div>
+  )}
 
-  </div>
+ 
+  {!isSearchOpen && (
+    <div 
+      className="header-icon-search flex items-center justify-center cursor-pointer hover:bg-white/20 rounded-full transition-all text-black duration-300"
+      onClick={handleSearch}
+    >
+      <Image
+        src={Search}
+        alt="Search Icon"
+        width={24}
+        height={24}
+        className="transition-transform duration-300"
+      />
+    </div>
+  )}
 
+ 
   <div 
     className={`relative transition-all duration-300 ease-in-out ${
-      isSearchOpen 
-        ? "w-40 sm:w-56 md:w-64 opacity-100 mr-2 ml-2" 
-        : "w-0 opacity-0 ml-0"
+      isSearchOpen ? "w-40 sm:w-56 md:w-64 opacity-100" : "w-0 opacity-0"
     }`}
   >
     <input
       ref={searchInputRef}
       type="text"
       placeholder="Search..."
-      className="w-full h-8 text-black focus:outline-none text-sm pr-8 pl-2 rounded-full"
+      className="w-full h-8 text-black focus:outline-none text-sm pr-8 pl-2 rounded-full h-12"
     />
     
     
@@ -130,6 +142,7 @@ export default function Header() {
     </div>
   </div>
 </div>
+
 
           
           <div className="header-icon hover:bg-white/20 h-10 w-10 rounded-full flex items-center justify-center">

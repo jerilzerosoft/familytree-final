@@ -64,7 +64,6 @@ export default function   DetailsPage() {
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
 
 
-
     const handleSearch = () => {
         const filteredResults = peopleData.filter(person => {
             return (
@@ -75,7 +74,6 @@ export default function   DetailsPage() {
         setResults(filteredResults);
         setResults(peopleData);
     };
-
     const handleReset = () => {
         setNameQuery('');
         setPathQuery('');
@@ -91,14 +89,13 @@ export default function   DetailsPage() {
         setIsModalOpen(false);
     };
 
-
     return (
         <div className="bg-gray-100">
             <div className="text-white text-center inner-banner">
                 <Header />
                 <div className="flex justify-center items-center">
                     <h1 className="text-2xl md:text-5xl font-bold shadow-md">
-                        Details
+                        Search Family Members
                     </h1>
                 </div>
             </div>
@@ -136,8 +133,6 @@ export default function   DetailsPage() {
                     </div>
                 </div>
             </div>
-
-
 
             <div className="pb-16 px-4 container mx-auto">
                 <div className="flex justify-between items-center mb-6">
@@ -180,10 +175,10 @@ export default function   DetailsPage() {
                         </div>
                     ))}
                 </div>
-
             </div>
 
             <Footer />
+
             <PopupProfile
                 isOpen={isModalOpen}
                 onClose={closeModal}

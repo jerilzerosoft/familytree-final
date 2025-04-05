@@ -71,6 +71,9 @@ const Home = () => {
   const handlegallary = () => {
     router.push("/familygallary");
   }
+  const handleFamilyMembers = () => {
+    router.push("/familydetails");
+  }
   return (
     <div className="bg-gray-100">
       {/* Hero Section */}
@@ -82,12 +85,16 @@ const Home = () => {
               DISCOVER & BUILD YOUR <br /> FAMILY LEGACY
             </h1>
             <p className="mt-4 text-shadow">
-              {"Bring your family's history to life. Track generations, celebrate relationships, and preserve <br /> recious memories—all in one beautifully crafted family tree."}
+              {"Bring your family's history to life. Track generations, celebrate relationships, and preserve"}
+              <br />
+
+
+              {"recious memories—all in one beautifully crafted family tree."}
             </p>
             <div className="mt-6 space-x-4">
               <Link
-                href="/familymembers"
-                className="bg-white text-black p-4 rounded-full text-sm shadow-md"
+                href="/familydetails"
+                className="bg-white hover:bg-amber-100 text-black p-4 rounded-full text-sm shadow-md"
               >
                 View Family Members
               </Link>
@@ -95,17 +102,19 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <section className="py-16 px-4 container mx-auto">
+      <section className="py-16 px-4 container mx-auto bg-white">
         <h2 className="text-3xl md:text-4xl font-semibold text-green-700 text-center mb-12">
           About the Family Tree
         </h2>
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div>
+        <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+          <div className="md:w-1/2">
             <h3 className="text-xl font-bold mb-4">
-              {"  Preserve Your Family's Legacy for Generations to Come."}
+              {"Preserve Your Family's Legacy for Generations to Come."}
             </h3>
             <p className="text-gray-700 mb-8">
-              {"Every family has a story worth telling. With our Family Tree  platform, you can bring your family's history to life—track generations, celebrate bonds, and ensure your legacy lives on for the future."}
+              {
+                "Every family has a story worth telling. With our Family Tree platform, you can bring your family's history to life—track generations, celebrate bonds, and ensure your legacy lives on for the future."
+              }
             </p>
             <div className="space-y-4">
               {features.map((feature) => (
@@ -121,82 +130,85 @@ const Home = () => {
                       height={19}
                       className="rounded-lg"
                     />
-                    <span role="img" aria-label="icon"></span>
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-800">{feature.title}</h4>
-                    <p className="text-sm text-gray-700">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8">
-              <Link
-                href="/family-members"
-                className="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-full transition duration-300"
-              >
-                View Family Tree
-              </Link>
-            </div>
-          </div>
-          <div>
-            <Image src={Welcome} alt="Family gathering at ancestral house" />
-          </div>
-        </div>
-      </section>
-      <section className="py-16 px-4 container mx-auto">
-        <h2 className="text-3xl md:text-4xl font-semibold text-green-700 text-center mb-12">
-          Explore Family Gallery
-        </h2>
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <Image src={Gallery} alt="Family gathering at ancestral house" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold mb-4">
-              Explore Your Family’s Timeless Moments.
-            </h3>
-            <p className="text-gray-700 mb-8">
-              {"  Every photograph tells a story, every memory holds a legacy. The Family Gallery is a place where you can store, explore, and share your family's precious moments. From childhood snapshots to grand celebrations, keep your memories alive for generations to come."}
-            </p>
-            <div className="space-y-4">
-              {gallery.map((g) => (
-                <div
-                  key={g.id}
-                  className="flex items-start p-4 bg-gradient-to-r from-[#F0ED5C] to-[#FFFFFF] rounded-md"
-                >
-                  <div className="mr-3 p-2 rounded-full">
-                    <Image
-                      src={g.icon}
-                      alt="Family gathering at ancestral house"
-                      width={22}
-                      height={19}
-                      className="rounded-lg"
-                    />
-                    <span role="img" aria-label="icon"></span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800">{g.title}</h4>
-                    <p className="text-sm text-gray-700">
-                      {g.description}
-                    </p>
+                    <p className="text-sm text-gray-700">{feature.description}</p>
                   </div>
                 </div>
               ))}
             </div>
             <div className="mt-8">
               <div
-                onClick={handlegallary}
+                onClick={handleFamilyMembers}
                 className="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-full transition duration-300"
               >
-                View Gallery
+                View Family Tree
               </div>
             </div>
           </div>
+
+          <div className="md:w-1/2 flex justify-end items-end">
+            <Image src={Welcome} alt="Family gathering at ancestral house" />
+          </div>
         </div>
+
       </section>
+      <section className="py-16 px-4 container mx-auto">
+  <h2 className="text-3xl md:text-4xl font-semibold text-green-700 text-center mb-12">
+    Explore Family Gallery
+  </h2>
+
+  <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+    {/* Text Section */}
+    <div className="md:w-1/2">
+      <h3 className="text-xl font-bold mb-4">
+        Explore Your Family’s Timeless Moments.
+      </h3>
+      <p className="text-gray-700 mb-8">
+        {
+          "Every photograph tells a story, every memory holds a legacy. The Family Gallery is a place where you can store, explore, and share your family's precious moments. From childhood snapshots to grand celebrations, keep your memories alive for generations to come."
+        }
+      </p>
+      <div className="space-y-4">
+        {gallery.map((g) => (
+          <div
+            key={g.id}
+            className="flex items-start p-4 bg-gradient-to-r from-[#F0ED5C] to-[#FFFFFF] rounded-md"
+          >
+            <div className="mr-3 p-2 rounded-full">
+              <Image
+                src={g.icon}
+                alt="Gallery icon"
+                width={22}
+                height={19}
+                className="rounded-lg"
+              />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-800">{g.title}</h4>
+              <p className="text-sm text-gray-700">{g.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-8">
+        <div
+          onClick={handlegallary}
+          className="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-full transition duration-300"
+        >
+          View Gallery
+        </div>
+      </div>
+    </div>
+
+    {/* Image Section */}
+    <div className="md:w-1/2 flex justify-end items-end">
+      <Image src={Gallery} alt="Family gathering at ancestral house" />
+    </div>
+  </div>
+</section>
+
       <Footer />
     </div>
   );

@@ -134,12 +134,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, person }) 
           {activeTab === "Tab 02" && (
             <>
               {!isAdmin ? (
-                <div className="flex flex-col items-center justify-center p-6 border border-red-300 bg-red-50 rounded-lg">
-                  <p className="text-center text-lg font-semibold text-red-600">
+                <div className="flex flex-col items-center justify-center p-6 border border-blue-300 bg-red-50 rounded-lg">
+                  <p className="text-center text-lg font-semibold text-blue-600">
                     Please contact admin to view this information.
                   </p>
                   <   Image src={Shield} alt="Contact Admin" className="w-40 h-40 mb-4" />
-                  <button className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4">Contact Admin</button>
+                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4">Contact Admin</button>
                 </div>
               ) : (
                 <>
@@ -204,12 +204,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, person }) 
           {activeTab === "Tab 03" && (
             <>
               {!isAdmin ? (
-                <div className="flex flex-col items-center justify-center p-6 border border-red-300 bg-red-50 rounded-lg">
-                  <p className="text-center text-lg font-semibold text-red-600">
+                <div className="flex flex-col items-center justify-center p-6 border border-blue-300 bg-red-50 rounded-lg">
+                  <p className="text-center text-lg font-semibold text-blue-600">
                     Please contact admin to view this information.
                   </p>
                   <   Image src={Shield} alt="Contact Admin" className="w-40 h-40 mb-4" />
-                  <button className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4">Contact Admin</button>
+                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4">Contact Admin</button>
                 </div>
               ) : (
                 <>

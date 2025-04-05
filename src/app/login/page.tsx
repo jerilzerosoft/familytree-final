@@ -1,16 +1,32 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import Email from "@/assets/images/mail-icon.png";
 import Password from "@/assets/images/password-icon.png";
 
 const Login = () => {
+  const router = useRouter();
+
   return (
     <div className="flex items-center justify-center min-h-screen banner-images login-banner">
       {/* Login Form */}
+     
       <div
-        className="p-8 rounded-lg shadow-lg mx-auto backdrop-blur-md"
+        className="p-8 rounded-lg shadow-lg mx-auto backdrop-blur-md w-full max-w-md"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.8)" }}
       >
+         <div className="mb-4 flex justify-end">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="text-sm text-gray-600 hover:text-black transition"
+            >
+              ← Back
+            </button>
+          </div>
+      
         <h2 className="text-3xl font-bold text-center text-gray-800">
           Welcome Back!
         </h2>
@@ -56,10 +72,15 @@ const Login = () => {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <button className="inline-block bg-[#EEEA0F] hover:bg-yellow-500 text-black py-3 px-6 rounded-full transition duration-300">
+            <button
+              type="submit"
+              className="inline-block bg-[#EEEA0F] hover:bg-yellow-500 text-black py-3 px-6 rounded-full transition duration-300"
+            >
               Sign In
             </button>
           </div>
+
+         
         </form>
       </div>
     </div>
