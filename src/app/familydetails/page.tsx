@@ -1,4 +1,6 @@
-
+//  @typescript-eslint/no-explicit-any
+//  @typescript-eslint/no-unused-vars
+// @typescript-eslint/no-unused-vars
 
 "use client"
 
@@ -32,7 +34,7 @@ export default function DetailsPage() {
 
     const debounce = (func: Function, delay: number) => {
         let timeoutId: NodeJS.Timeout;
-        return (...args: any[]) => {
+        return (...args: any[]) => { 
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => func(...args), delay);
         };

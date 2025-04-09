@@ -265,7 +265,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({ isOpen, onClose, person }) 
                         value={person.fathers_name || ''}
                         readOnly
                         className="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-green-500"
-                        placeholder="Father's Name"
+                        placeholder="{'Father's Name'}"
                       />
                     </div>
                     <div className="flex flex-col">
@@ -276,7 +276,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({ isOpen, onClose, person }) 
                         value={person.mothers_name || ''}
                         readOnly
                         className="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-green-500"
-                        placeholder="Mother's Name"
+                        placeholder="{'Mother's Name'}"
                       />
                     </div>
                   </div>
