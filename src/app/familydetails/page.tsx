@@ -59,7 +59,7 @@ export default function DetailsPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem('authToken');
-            let url = `http://localhost:8000/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
+            let url = `https://api.familytreee.zerosoft.in/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
 
             // Create a combined search query if either field has content
             if (nameQuery || pathQuery) {
@@ -90,7 +90,21 @@ export default function DetailsPage() {
                     phone: profile.phone || "N/A",
                     email: profile.email,
                     avatar: profile.profile_picture || Avator,
+                    date_of_birth: profile.date_of_birth || "N/A",
+                    place_of_birth: profile.place_of_birth || "N/A",
+                    address: profile.home_address || "N/A",
+                    country: profile.nationality || "N/A",  // not profile.country
+                    pin_code: profile.postcode || "N/A",    // not profile.pin_code
+                    fathers_name: profile.fathers_name || "N/A", // optional, not in sample response
+                    mothers_name: profile.mothers_name || "N/A", // optional, not in sample response
+                    nation: profile.nationality || "N/A",   // optional: might remove if using `country`
+                    career: profile.occupation || "N/A",    // occupation = career
+                    employment: profile.occupation || "N/A", // same as career, unless you separate it
+                    work_address: profile.work_address || "N/A",
+                    additional_info: profile.additional_info || "N/A",
+                    mykad_number:profile.mykad_number // not in sample, maybe add in backend?
                 })));
+                
                 setTotalPages(data.pagination.total_pages);
                 setTotalItems(data.pagination.total_items);
             } else {
@@ -112,7 +126,7 @@ export default function DetailsPage() {
         setPathQuery('');
         setCurrentPage(1);
 
-        setTimeout(() => fetchProfiles(), 0);
+        setTimeout(() => fetchProfiles());
     };
 
     const openModal = (person: Person): void => {
@@ -140,7 +154,7 @@ export default function DetailsPage() {
                 key="prev"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 mx-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
+                className={`px-3 py-1 mx-1 cursor-pointer rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
             >
                 &laquo;
             </button>
@@ -155,7 +169,7 @@ export default function DetailsPage() {
                 <button
                     key={i}
                     onClick={() => handlePageChange(i)}
-                    className={`px-3 py-1 mx-1 rounded ${currentPage === i ? 'bg-green-700 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    className={`px-3 py-1 mx-1  cursor-pointer rounded ${currentPage === i ? 'bg-green-700 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
                 >
                     {i}
                 </button>
@@ -168,7 +182,7 @@ export default function DetailsPage() {
                 key="next"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`px-3 py-1 mx-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
+                className={`px-3 py-1 mx-1 cursor-pointer  rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
             >
                 &raquo;
             </button>
@@ -208,13 +222,13 @@ export default function DetailsPage() {
                         />
                         <button
                             onClick={handleSearch}
-                            className="px-8 py-3 bg-green-700 text-white rounded-4xl hover:bg-green-800"
+                            className="px-8 py-3 bg-green-700 cursor-pointer text-white rounded-4xl hover:bg-green-800"
                         >
                             Search
                         </button>
                         <button
                             onClick={handleReset}
-                            className="px-8 py-3 bg-gray-400 text-white rounded-4xl hover:bg-gray-500"
+                            className="px-8 py-3 bg-gray-400 cursor-pointer text-white rounded-4xl hover:bg-gray-500"
                         >
                             Reset
                         </button>
@@ -265,7 +279,7 @@ export default function DetailsPage() {
                                         </div>
                                         <button
                                             onClick={() => openModal(person)}
-                                            className="bg-yellow-300 text-black px-6 py-4 rounded-full text-sm font-medium hover:bg-yellow-400 w-full md:w-auto"
+                                            className="bg-yellow-300 text-black px-6 py-4 cursor-pointer rounded-full text-sm font-medium hover:bg-yellow-400 w-full md:w-auto"
                                         >
                                             View Details
                                         </button>
@@ -279,7 +293,7 @@ export default function DetailsPage() {
                         </div>
 
                         {totalPages > 1 && (
-                            <div className="flex justify-center mt-8">
+                            <div className="flex justify-center  mt-8">
                                 {renderPagination()}
                             </div>
                         )}

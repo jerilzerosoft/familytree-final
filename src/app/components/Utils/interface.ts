@@ -6,11 +6,32 @@ export interface Person {
     phone: string;
     email: string;
     avatar: string; 
+    address:string
+    country?: string; 
+    place_of_birth:string;
+    date_of_birth:string;
+    mothers_name:string;
+    fathers_name:string;
+    pin_code:string;
+    race:string;
+    nationality:string;
+    username:string;
+    user_id:string;
+    additional_info:string;
+    work_address:string;
+    employment:string;
+    occupation:string;
+    career:string;
+    nation:string;
+    mykad_number:string;
+    telephone:string;
+ 
 }
 export interface Persons {
   name: string;
   email: string;
   avatar?: string;
+  
 }
 
 export interface ProfileModalProps {

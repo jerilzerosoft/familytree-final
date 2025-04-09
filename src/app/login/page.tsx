@@ -18,7 +18,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/admin/login/", {
+      const response = await fetch("https://api.familytreee.zerosoft.in/admin/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
