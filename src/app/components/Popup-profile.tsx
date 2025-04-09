@@ -51,7 +51,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, person }) 
         return;
       }
 
-      const response = await axios.get(`http://localhost:8000/admin/login/api/request-access-status/`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/admin/login/api/request-access-status/`);
       setApprovedTabs(response.data.approved_tabs || []);
       setAuthError(null);
     } catch (error: any) {
@@ -74,7 +74,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, person }) 
     }
   
     try {
-      await axios.post('http://localhost:8000/admin/login/api/request-access/', {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/admin/login/api/request-access/`, {
         username,
         tab,
       });

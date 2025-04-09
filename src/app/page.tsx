@@ -143,7 +143,7 @@ const Home = () => {
 
   const fetchDataFromAPI = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/get/all/');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/get/all/`);
       const data = response.data;
       
   

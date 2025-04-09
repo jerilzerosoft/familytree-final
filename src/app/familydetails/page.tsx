@@ -59,7 +59,7 @@ export default function DetailsPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem('authToken');
-            let url = `http://localhost:8000/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
+            let url = `${process.env.NEXT_PUBLIC_API_URL}/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
 
             // Create a combined search query if either field has content
             if (nameQuery || pathQuery) {
