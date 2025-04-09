@@ -2,7 +2,7 @@
 //  @typescript-eslint/no-unused-vars
 // @typescript-eslint/no-unused-vars
 
-"use client"
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -17,7 +17,7 @@ import { useCallback } from 'react';
 
 
 export default function DetailsPage() {
-    const searchParams = useSearchParams();
+    // const searchParams = useSearchParams();
     const [nameQuery, setNameQuery] = useState('');
     const [pathQuery, setPathQuery] = useState('');
     const [results, setResults] = useState<Person[]>([]);
@@ -51,19 +51,19 @@ export default function DetailsPage() {
 
 
     
-    useEffect(() => {
-        const searchQuery = searchParams.get('search');
-        if (searchQuery) {
+    // useEffect(() => {
+    //     const searchQuery = searchParams.get('search');
+    //     if (searchQuery) {
             
-            const parts = searchQuery.split(' ');
-            if (parts.length > 1) {
-                setNameQuery(parts[0]);
-                setPathQuery(parts.slice(1).join(' '));
-            } else {
-                setNameQuery(searchQuery);
-            }
-        }
-    }, [searchParams]);
+    //         const parts = searchQuery.split(' ');
+    //         if (parts.length > 1) {
+    //             setNameQuery(parts[0]);
+    //             setPathQuery(parts.slice(1).join(' '));
+    //         } else {
+    //             setNameQuery(searchQuery);
+    //         }
+    //     }
+    // }, [searchParams]);
 
 
     useEffect(() => {
