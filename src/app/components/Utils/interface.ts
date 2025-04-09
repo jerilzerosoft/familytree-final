@@ -1,3 +1,5 @@
+import { StaticImageData } from 'next/image';
+
 export interface Person {
     id: number;
     name: string;
@@ -54,3 +56,27 @@ export interface UserData {
     professionalInfo: ProfessionalInfo;
     agreeToTerms: boolean;
 }
+
+export interface ApiFeature {
+    id: number;
+    title: string;
+    description: string;
+    icon?: string;
+    }
+
+    
+export interface ApiGalleryFeature {
+        id: number;
+        title: string;
+        description: string;
+        icon?: string;
+        }
+
+export interface GalleryFeature {
+        id: number;
+        title: string;
+        description: string;
+        icon: string | StaticImageData;
+        }
+
+

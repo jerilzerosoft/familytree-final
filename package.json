@@ -6,10 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+      "dev:3001": "next dev -p 3001"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.0",
+    "axios": "^1.8.4",
     "framer-motion": "^12.6.3",
     "next": "^15.2.4",
     "postcss": "^8.5.3",

@@ -106,14 +106,14 @@ export default function   DetailsPage() {
                     <div className="flex flex-col md:flex-row items-center gap-4">
                         <input
                             type="text"
-                            placeholder="Namma Waris (A)"
+                            placeholder="First Name"
                             className="w-full md:w-1/3 border-1 border-gray-500 rounded-xl h-12 p-2"
                             value={nameQuery}
                             onChange={(e) => setNameQuery(e.target.value)}
                         />
                         <input
                             type="text"
-                            placeholder="Jalur (O)"
+                            placeholder="Last Name"
                             className="w-full md:w-1/3 border-1 border-gray-500 rounded-xl  h-12 p-2"
                             value={pathQuery}
                             onChange={(e) => setPathQuery(e.target.value)}
