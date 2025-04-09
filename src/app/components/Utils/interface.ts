@@ -1,12 +1,12 @@
 import { StaticImageData } from 'next/image';
 
 export interface Person {
-    id: number;
+    id: string;
     name: string;
     phone: string;
     email: string;
+    avatar: string; 
 }
-
 export interface Persons {
   name: string;
   email: string;
