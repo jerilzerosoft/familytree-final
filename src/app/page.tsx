@@ -143,7 +143,7 @@ const Home = () => {
 
   const fetchDataFromAPI = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/get/all/');
+      const response = await axios.get('https://api.familytreee.zerosoft.in/api/get/all/');
       const data = response.data;
       
   

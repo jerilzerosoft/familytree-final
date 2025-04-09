@@ -1,7 +1,10 @@
+
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import Avator from "@/assets/images/user.png";
@@ -12,6 +15,7 @@ import { useCallback } from 'react';
 
 
 export default function DetailsPage() {
+    const searchParams = useSearchParams();
     const [nameQuery, setNameQuery] = useState('');
     const [pathQuery, setPathQuery] = useState('');
     const [results, setResults] = useState<Person[]>([]);
@@ -21,7 +25,7 @@ export default function DetailsPage() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(false);
 
@@ -44,6 +48,22 @@ export default function DetailsPage() {
     );
 
 
+    
+    useEffect(() => {
+        const searchQuery = searchParams.get('search');
+        if (searchQuery) {
+            
+            const parts = searchQuery.split(' ');
+            if (parts.length > 1) {
+                setNameQuery(parts[0]);
+                setPathQuery(parts.slice(1).join(' '));
+            } else {
+                setNameQuery(searchQuery);
+            }
+        }
+    }, [searchParams]);
+
+
     useEffect(() => {
         if (nameQuery !== '' || pathQuery !== '') {
             debouncedSearch();
@@ -59,15 +79,17 @@ export default function DetailsPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem('authToken');
+            // let url = `http://localhost:8000/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
             let url = `https://api.familytreee.zerosoft.in/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
+            // let url = `${process.env.NEXT_PUBLIC_API_URL}/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
 
-            // Create a combined search query if either field has content
+            
             if (nameQuery || pathQuery) {
-                // If both fields have values, combine them
+                
                 if (nameQuery && pathQuery) {
                     url += `&search=${encodeURIComponent(`${nameQuery} ${pathQuery}`)}`;
                 } else {
-                    // Otherwise use whichever has a value
+                   
                     const searchTerm = nameQuery || pathQuery;
                     url += `&search=${encodeURIComponent(searchTerm)}`;
                 }
@@ -93,16 +115,16 @@ export default function DetailsPage() {
                     date_of_birth: profile.date_of_birth || "N/A",
                     place_of_birth: profile.place_of_birth || "N/A",
                     address: profile.home_address || "N/A",
-                    country: profile.nationality || "N/A",  // not profile.country
-                    pin_code: profile.postcode || "N/A",    // not profile.pin_code
-                    fathers_name: profile.fathers_name || "N/A", // optional, not in sample response
-                    mothers_name: profile.mothers_name || "N/A", // optional, not in sample response
-                    nation: profile.nationality || "N/A",   // optional: might remove if using `country`
-                    career: profile.occupation || "N/A",    // occupation = career
-                    employment: profile.occupation || "N/A", // same as career, unless you separate it
+                    country: profile.nationality || "N/A",  
+                    pin_code: profile.postcode || "N/A",    
+                    fathers_name: profile.fathers_name || "N/A",
+                    mothers_name: profile.mothers_name || "N/A",
+                    nation: profile.nationality || "N/A",  
+                    career: profile.occupation || "N/A",   
+                    employment: profile.occupation || "N/A", 
                     work_address: profile.work_address || "N/A",
                     additional_info: profile.additional_info || "N/A",
-                    mykad_number:profile.mykad_number // not in sample, maybe add in backend?
+                    mykad_number:profile.mykad_number
                 })));
                 
                 setTotalPages(data.pagination.total_pages);
@@ -121,13 +143,17 @@ export default function DetailsPage() {
         setCurrentPage(1);
         fetchProfiles();
     };
+    
+    useEffect(() => {
+        fetchProfiles();
+    }, [nameQuery, pathQuery, currentPage]);
+    
     const handleReset = () => {
         setNameQuery('');
         setPathQuery('');
         setCurrentPage(1);
-
-        setTimeout(() => fetchProfiles());
     };
+    
 
     const openModal = (person: Person): void => {
         setSelectedPerson(person);

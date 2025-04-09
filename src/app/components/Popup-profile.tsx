@@ -17,7 +17,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({ isOpen, onClose, person }) 
   const [activeTab, setActiveTab] = useState('Tab 01');
   const [requestSent, setRequestSent] = useState(false);
   const [requestLoading, setRequestLoading] = useState(false);
-  const user = { role: "user" }; // This would typically come from your auth context
+  const user = { role: "user" }; 
   const isAdmin = user?.role === "admin";
 
   useEffect(() => {
@@ -38,11 +38,6 @@ const PopupProfile: React.FC<PopupProfileProps> = ({ isOpen, onClose, person }) 
       setRequestLoading(true);
       const tabName = activeTab === 'Tab 02' ? 'Personal Info' : 'Additional Info';
       
-      const response = await axios.post('/api/access-requests/', {
-        user_id: person.user_id,
-        requested_tab: tabName,
-        person_id: person.id
-      });
       
       setRequestSent(true);
       setRequestLoading(false);
@@ -86,7 +81,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({ isOpen, onClose, person }) 
         <div className="flex border-b-4 border-green-800 mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('Tab 01')}
-            className={`py-3 px-4 rounded-t-xl mr-2 border border-green-800 ${
+            className={`py-3 px-4 cursor-pointer rounded-t-xl mr-2 border border-green-800 ${
               activeTab === 'Tab 01' ? 'bg-green-800 text-white' : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -94,7 +89,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({ isOpen, onClose, person }) 
           </button>
           <button
             onClick={() => setActiveTab('Tab 02')}
-            className={`py-3 px-4 mr-2 border border-green-800 rounded-t-xl ${
+            className={`py-3 cursor-pointer px-4 mr-2 border border-green-800 rounded-t-xl ${
               activeTab === 'Tab 02' ? 'bg-green-800 text-white' : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -102,7 +97,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({ isOpen, onClose, person }) 
           </button>
           <button
             onClick={() => setActiveTab('Tab 03')}
-            className={`py-3 px-4 border border-green-800 rounded-t-xl ${
+            className={`py-3 cursor-pointer px-4 border border-green-800 rounded-t-xl ${
               activeTab === 'Tab 03' ? 'bg-green-800 text-white' : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -458,7 +453,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({ isOpen, onClose, person }) 
         <div className="flex justify-end p-4 space-x-4 bg-gray-50 mt-6">
           <button
             onClick={onClose}
-            className="py-2 px-6 bg-gray-200 rounded-full text-gray-700 hover:bg-gray-300 transition"
+            className="py-2 px-6 cursor-pointer bg-gray-200 rounded-full text-gray-700 hover:bg-gray-300 transition"
           >
             Close
           </button>

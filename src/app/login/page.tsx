@@ -6,6 +6,8 @@ import Image from "next/image";
 import Email from "@/assets/images/mail-icon.png";
 import Password from "@/assets/images/password-icon.png";
 
+
+
 const Login = () => {
   const router = useRouter();
 
@@ -18,7 +20,9 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("https://api.familytreee.zerosoft.in/admin/login/", {
+      const response = await fetch("https://api.familytreee.zerosoft.in/admin/login/",{
+      // const response = await fetch("http://localhost:8000/admin/login/", {
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -29,13 +33,12 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        
         localStorage.setItem("authToken", data.token);
-    
+
         localStorage.setItem("authToken", data.token);
-localStorage.setItem("userId", data.user.id);        // Already used
-localStorage.setItem("userEmail", data.user.email);  // Optional
-localStorage.setItem("username", data.user.username); // ✅ New
+        localStorage.setItem("userId", data.user.id); // Already used
+        localStorage.setItem("userEmail", data.user.email); // Optional
+        localStorage.setItem("username", data.user.username); // ✅ New
 
         router.push("/");
       } else {
