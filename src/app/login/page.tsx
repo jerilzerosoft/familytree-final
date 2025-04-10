@@ -36,9 +36,9 @@ const Login = () => {
         localStorage.setItem("authToken", data.token);
 
         localStorage.setItem("authToken", data.token);
-        localStorage.setItem("userId", data.user.id); // Already used
-        localStorage.setItem("userEmail", data.user.email); // Optional
-        localStorage.setItem("username", data.user.username); // ✅ New
+        localStorage.setItem("userId", data.user.id); 
+        localStorage.setItem("userEmail", data.user.email); 
+        localStorage.setItem("username", data.user.username); 
 
         router.push("/");
       } else {
@@ -60,7 +60,7 @@ const Login = () => {
           <button
             type="button"
             onClick={() => router.back()}
-            className="text-sm text-gray-600 hover:text-black transition"
+            className="text-sm text-gray-600 cursor-pointer hover:text-black transition"
           >
             ← Back
           </button>
@@ -123,7 +123,7 @@ const Login = () => {
           <div className="mt-8 flex justify-center">
             <button
               type="submit"
-              className="inline-block bg-[#EEEA0F] hover:bg-yellow-500 text-black py-3 px-6 rounded-full transition duration-300"
+              className="inline-block cursor-pointer bg-[#EEEA0F] hover:bg-yellow-500 text-black py-3 px-6 rounded-full transition duration-300"
             >
               Sign In
             </button>

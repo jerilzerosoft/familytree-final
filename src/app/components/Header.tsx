@@ -16,9 +16,50 @@ export default function Header() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
+
+  const handleLogout = () => {
+    
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("username");
+
+    window.location.href = "/login";
+  };
 
   useEffect(() => {
-    // Check token in localStorage (or you can use cookies)
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
+  
+  const handlegallary = () => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      router.push("/gallery");
+    } else {
+      setShowLoginModal(true);
+    }
+  };
+
+  useEffect(() => {
+   
     const token = localStorage.getItem("authToken");
     if (token) {
       setIsLoggedIn(true);
@@ -29,9 +70,7 @@ export default function Header() {
     router.push("/");
   };
 
-  const handlegallary = () => {
-    router.push("/familygallary");
-  };
+
 
   const handleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -44,7 +83,7 @@ export default function Header() {
     }
   };
 
-  // Handle key press events for search input
+ 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearchSubmit();
@@ -75,6 +114,7 @@ export default function Header() {
   }, [isSearchOpen]);
 
   return (
+    <>
     <div className="container mx-auto p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
@@ -162,25 +202,66 @@ export default function Header() {
             />
           </div>
           
-          <div>
-            {isLoggedIn ? (
+          <div className="relative" ref={dropdownRef}>
+      {isLoggedIn ? (
+        <>
+          <button
+            onClick={toggleDropdown}
+            className="bg-white text-black p-2 rounded-full text-sm shadow-md flex items-center gap-2"
+          >
+            <Image src={profile} alt="Profile Icon" width={28} height={28} className="rounded-full" />
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50">
               <Link
                 href="/profile"
-                className="bg-white text-black p-3 rounded-full text-sm shadow-md flex items-center gap-2"
+                className="block px-4 py-2 text-black hover:bg-gray-100 text-sm"
               >
-                <Image src={profile} alt="Profile Icon" width={20} height={20} />
+                View Profile
               </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="bg-white text-black p-4 rounded-full text-sm shadow-md"
+              <button
+                onClick={handleLogout}
+                className="w-full text-centre px-4 py-2 hover:bg-gray-100 text-sm text-red-600"
               >
-                Login
-              </Link>
-            )}
-          </div>
+                Logout
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <Link
+          href="/login"
+          className="bg-white text-black p-4 rounded-full text-sm shadow-md"
+        >
+          Login
+        </Link>
+      )}
+    </div>
         </div>
       </div>
     </div>
+    {showLoginModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-[rgba(10,7,7,0.6)]">
+          <div className="bg-white rounded-lg p-6 w-[300px] text-center shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">Please log in</h2>
+            <p className="mb-6 text-sm text-gray-600">You need to log in to access the gallery.</p>
+            <button
+              onClick={() => (window.location.href = "/login")}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full mb-2"
+            >
+              Go to Login
+            </button>
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="text-gray-500 text-sm hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+
   );
 }

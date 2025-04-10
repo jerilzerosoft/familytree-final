@@ -6,9 +6,7 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { UserData } from "@/app/components/Utils/interface";
 
-
 export default function ProfilePage() {
-
     const [userData, setUserData] = useState({
         personalInfo: {
             firstName: '',
@@ -17,10 +15,15 @@ export default function ProfilePage() {
             telephoneNumber: '',
             email: '',
             avatar: '/assets/images/456322.webp',
+            mykadNumber: '',
+            username: '',
+            userRole: '',
+            userId: '',
+            race: '',
         },
         addressInfo: {
             address: '',
-            country: 'USA',
+            country: 'Malaysia',
             pinCode: '',
             fathersName: '',
             mothersName: '',
@@ -37,8 +40,8 @@ export default function ProfilePage() {
         agreeToTerms: false
     });
 
-
-
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const handleChange = (
         section: keyof UserData,
@@ -54,66 +57,185 @@ export default function ProfilePage() {
         }));
     };
 
-
-    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        setUserData((prevData: UserData) => ({
-            ...prevData,
-            agreeToTerms: e.target.checked
-        }));
-    };
-
+ 
 
     useEffect(() => {
-
         const loadUserData = async () => {
+            setIsLoading(true);
             try {
+                
+                const token = localStorage.getItem('authToken');
+                const userId = localStorage.getItem('userId');
+                
+                if (!token) {
+                    throw new Error('Authentication token not found');
+                }
+                
+                
+                // const response = await fetch(`http://localhost:8000/admin/get-profile/${userId}/`, {
+                    const response = await fetch(`https://api.familytreee.zerosoft.in/admin/get-profile/${userId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile data');
+                }
+                
+                const data = await response.json();
+                
+                
+                const profile = data.profile;
+                
+                if (!profile) {
+                    throw new Error('No profile data found');
+                }
+                
+                
+                const nameParts = (profile.full_name || '').split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
 
-                setTimeout(() => {
-                    const sampleData = {
-                        personalInfo: {
-                            firstName: 'Ahmad',
-                            lastName: 'bin Abdullah',
-                            phoneNumber: '+1234567890',
-                            telephoneNumber: '+0987654321',
-                            email: 'ahmad@example.com',
-                            avatar: '/assets/images/456322.webp',
-                        },
-                        addressInfo: {
-                            address: '123 Main Street',
-                            country: 'USA',
-                            pinCode: '12345',
-                            fathersName: 'Abdullah',
-                            mothersName: 'Fatima',
-                            dateOfBirth: '1990-01-01',
-                            birthPlace: 'Riyadh',
-                        },
-                        professionalInfo: {
-                            nation: 'Saudi Arabia',
-                            career: 'Software Engineer',
-                            employment: 'Tech Company Inc.',
-                            workAddress: '456 Tech Boulevard',
-                            additionalInfo: '',
-                        },
-                        agreeToTerms: false
-                    };
-
-                    setUserData(sampleData);
-                }, 300);
+                setUserData({
+                    personalInfo: {
+                        firstName,
+                        lastName,
+                        phoneNumber: profile.phone || '',
+                        telephoneNumber: profile.phone || '', 
+                        email: profile.email || '',
+                        avatar: profile.profile_picture || '/assets/images/456322.webp',
+                        mykadNumber: profile.mykad_number || '',
+                        username: profile.username || '',
+                        userRole: profile.user_role || '',
+                        userId: profile.user_id || '',
+                        race: profile.race || '',
+                    },
+                    addressInfo: {
+                        address: profile.home_address || '',
+                        country: profile.nationality || 'Malaysia',
+                        pinCode: profile.postcode || '',
+                        fathersName: profile.fathers_name || '',
+                        mothersName: profile.mothers_name || '',
+                        dateOfBirth: profile.date_of_birth || '',
+                        birthPlace: profile.place_of_birth || '',
+                    },
+                    professionalInfo: {
+                        nation: profile.nationality || '',
+                        career: profile.occupation || '',
+                        employment: profile.occupation || '', 
+                        workAddress: profile.work_address || '',
+                        additionalInfo: profile.additional_info || '',
+                    },
+                    agreeToTerms: false
+                });
             } catch (error) {
                 console.error('Error loading user data:', error);
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         loadUserData();
     }, []);
 
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
-        console.log('Saving user data:', userData);
+        
+        try {
+            const token = localStorage.getItem('authToken');
+            
+            if (!token) {
+                throw new Error('Authentication token not found');
+            }
+            
+            
+            const apiData = {
+                full_name: `${userData.personalInfo.firstName} ${userData.personalInfo.lastName}`,
+                email: userData.personalInfo.email,
+                phone: userData.personalInfo.phoneNumber,
+                home_address: userData.addressInfo.address,
+                postcode: userData.addressInfo.pinCode,
+                date_of_birth: userData.addressInfo.dateOfBirth,
+                place_of_birth: userData.addressInfo.birthPlace,
+                nationality: userData.professionalInfo.nation,
+                occupation: userData.professionalInfo.career,
+                work_address: userData.professionalInfo.workAddress,
+                mykad_number: userData.personalInfo.mykadNumber,
+                race: userData.personalInfo.race,
+                fathers_name: userData.addressInfo.fathersName,
+                mothers_name: userData.addressInfo.mothersName,
+                additional_info: userData.professionalInfo.additionalInfo,
+                profile_picture: userData.personalInfo.avatar
+            };
 
-        alert('Profile updated successfully!');
+            
+            const response = await fetch(`http://localhost:8000/admin/update-profile/${userData.personalInfo.userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(apiData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update profile');
+            }
+
+            alert('Profile updated successfully!');
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert(`Failed to update profile: ${error.message}`);
+        }
     };
+
+    const handleLogout = () => {
+        // Clear auth token
+        localStorage.removeItem('authToken');
+        // Additional cleanup if needed
+        sessionStorage.clear();
+        // Redirect to login page
+        window.location.href = '/login';
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex justify-center items-center bg-gray-100">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-yellow-300 border-t-transparent"></div>
+                    <p className="mt-2 text-gray-700">Loading profile...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex justify-center items-center bg-gray-100">
+                <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+                    <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+                    <p className="text-gray-700">{error}</p>
+                    <button 
+                        onClick={() => window.location.reload()}
+                        className="mt-4 px-4 py-2 bg-yellow-300 text-black rounded-lg hover:bg-yellow-400"
+                    >
+                        Try Again
+                    </button>
+                    <button 
+                        onClick={() => window.location.href = '/login'}
+                        className="mt-4 ml-2 px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
+                    >
+                        Back to Login
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-gray-100">
@@ -124,38 +246,43 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <div className="container mx-auto mt-12  overflow-hidden">
-
-                <div className=" p-6">
-                    <div className="flex items-center">
-                        <div className="relative w-24 h-24 mr-6">
-                            <Image
-                                src={userData.personalInfo.avatar}
-                                alt="Profile"
-                                layout="fill"
-                                className="rounded-full border-4 border-white shadow-lg object-cover"
-                                priority
-                            />
+            <div className="container mx-auto mt-12 overflow-hidden">
+                <div className="p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <div className="relative w-24 h-24 mr-6">
+                                <Image
+                                    src={userData.personalInfo.avatar}
+                                    alt="Profile"
+                                    layout="fill"
+                                    className="rounded-full border-4 border-white shadow-lg object-cover"
+                                    priority
+                                />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-black">
+                                    {userData.personalInfo.firstName || 'New'} {userData.personalInfo.lastName || 'User'}
+                                </h1>
+                                <p className="text-black/80">
+                                    {userData.personalInfo.email || 'No email provided'}
+                                </p>
+                                <p className="text-black/60 text-sm mt-1">
+                                    {userData.professionalInfo.career || 'Career'} at {userData.professionalInfo.employment || 'Company'}
+                                </p>
+                            </div>
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-black">
-                                {userData.personalInfo.firstName || 'New'} {userData.personalInfo.lastName || 'User'}
-                            </h1>
-                            <p className="text-black/80">
-                                {userData.personalInfo.email || 'No email provided'}
-                            </p>
-                            <p className="text-black/60 text-sm mt-1">
-                                {userData.professionalInfo.career || 'Career'} at {userData.professionalInfo.employment || 'Company'}
-                            </p>
+                            <button 
+                                onClick={handleLogout}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
+                            >
+                                Logout
+                            </button>
                         </div>
                     </div>
                 </div>
 
-
                 <form onSubmit={handleSubmit} className="p-6">
-
-
-
                     <div className="mb-8">
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Personal Information</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -165,7 +292,7 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.personalInfo.firstName}
                                     onChange={(e) => handleChange('personalInfo', 'firstName', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg  focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                 />
                             </div>
                             <div>
@@ -187,11 +314,11 @@ export default function ProfilePage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Telephone Number</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">MyKad Number</label>
                                 <input
                                     type="text"
-                                    value={userData.personalInfo.telephoneNumber}
-                                    onChange={(e) => handleChange('personalInfo', 'telephoneNumber', e.target.value)}
+                                    value={userData.personalInfo.mykadNumber}
+                                    onChange={(e) => handleChange('personalInfo', 'mykadNumber', e.target.value)}
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                 />
                             </div>
@@ -204,9 +331,26 @@ export default function ProfilePage() {
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Race</label>
+                                <input
+                                    type="text"
+                                    value={userData.personalInfo.race}
+                                    onChange={(e) => handleChange('personalInfo', 'race', e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                                <input
+                                    type="text"
+                                    value={userData.personalInfo.userId}
+                                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100"
+                                    readOnly
+                                />
+                            </div>
                         </div>
                     </div>
-
 
                     <div className="mb-8">
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Address Information</h2>
@@ -223,7 +367,7 @@ export default function ProfilePage() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                                 <div className="flex items-center border border-gray-300 rounded-lg p-3 focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500">
-                                    <span className="mr-2">🇺🇸</span>
+                                    <span className="mr-2">🇲🇾</span>
                                     <input
                                         type="text"
                                         value={userData.addressInfo.country}
@@ -233,7 +377,7 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">PIN Code</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
                                 <input
                                     type="text"
                                     value={userData.addressInfo.pinCode}
@@ -242,7 +386,7 @@ export default function ProfilePage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Father Name</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Father's Name</label>
                                 <input
                                     type="text"
                                     value={userData.addressInfo.fathersName}
@@ -251,7 +395,7 @@ export default function ProfilePage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mother Name</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Mother's Name</label>
                                 <input
                                     type="text"
                                     value={userData.addressInfo.mothersName}
@@ -280,12 +424,11 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                   
                     <div className="mb-8">
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Professional Information</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nation</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
                                 <input
                                     type="text"
                                     value={userData.professionalInfo.nation}
@@ -294,7 +437,7 @@ export default function ProfilePage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Career</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
                                 <input
                                     type="text"
                                     value={userData.professionalInfo.career}
@@ -332,13 +475,12 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    {/* Agreement Checkbox */}
                     <div className="mb-8">
                         <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50">
                             <input
                                 type="checkbox"
                                 checked={userData.agreeToTerms}
-                                onChange={handleCheckboxChange}
+                                // onChange={handleCheckboxChange}
                                 className="h-5 w-5 text-green-500 rounded focus:ring-green-500 mr-2"
                             />
                             <label className="text-gray-700">
@@ -347,11 +489,11 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                
                     <div className="flex justify-end">
                         <button
                             type="submit"
-                            className="px-6 py-3 bg-yellow-300 text-black font-medium rounded-xl shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300"
+                            disabled={!userData.agreeToTerms}
+                            className={`px-6 py-3 font-medium rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 ${userData.agreeToTerms ? 'bg-yellow-300 text-black hover:bg-yellow-400' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
                         >
                             Save Profile
                         </button>

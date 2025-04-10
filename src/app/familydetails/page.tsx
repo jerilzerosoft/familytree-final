@@ -15,22 +15,19 @@ import PopupProfile from "@/app/components/Popup-profile";
 import { IoIosCall, IoMdMail } from "react-icons/io";
 import { useCallback } from 'react';
 
-
 export default function DetailsPage() {
-    // const searchParams = useSearchParams();
+    const searchParams = useSearchParams();
     const [nameQuery, setNameQuery] = useState('');
     const [pathQuery, setPathQuery] = useState('');
     const [results, setResults] = useState<Person[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
 
-
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(false);
-
 
     const debounce = (func: Function, delay: number) => {
         let timeoutId: NodeJS.Timeout;
@@ -40,7 +37,6 @@ export default function DetailsPage() {
         };
     };
 
-
     const debouncedSearch = useCallback(
         debounce(() => {
             setCurrentPage(1);
@@ -49,22 +45,19 @@ export default function DetailsPage() {
         [nameQuery, pathQuery]
     );
 
-
-    
-    // useEffect(() => {
-    //     const searchQuery = searchParams.get('search');
-    //     if (searchQuery) {
+    useEffect(() => {
+        const searchQuery = searchParams.get('search');
+        if (searchQuery) {
             
-    //         const parts = searchQuery.split(' ');
-    //         if (parts.length > 1) {
-    //             setNameQuery(parts[0]);
-    //             setPathQuery(parts.slice(1).join(' '));
-    //         } else {
-    //             setNameQuery(searchQuery);
-    //         }
-    //     }
-    // }, [searchParams]);
-
+            const parts = searchQuery.split(' ');
+            if (parts.length > 1) {
+                setNameQuery(parts[0]);
+                setPathQuery(parts.slice(1).join(' '));
+            } else {
+                setNameQuery(searchQuery);
+            }
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (nameQuery !== '' || pathQuery !== '') {
@@ -76,7 +69,6 @@ export default function DetailsPage() {
         fetchProfiles();
     }, [currentPage, pageSize]);
 
-
     const fetchProfiles = async () => {
         setLoading(true);
         try {
@@ -85,7 +77,6 @@ export default function DetailsPage() {
             let url = `https://api.familytreee.zerosoft.in/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
             // let url = `${process.env.NEXT_PUBLIC_API_URL}/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
 
-            
             if (nameQuery || pathQuery) {
                 
                 if (nameQuery && pathQuery) {
@@ -110,6 +101,7 @@ export default function DetailsPage() {
             if (response.ok) {
                 setResults(data.profiles.map((profile: any) => ({
                     id: profile.id,
+                    user_id: profile.user_id, 
                     name: profile.full_name,
                     phone: profile.phone || "N/A",
                     email: profile.email,
@@ -155,10 +147,10 @@ export default function DetailsPage() {
         setPathQuery('');
         setCurrentPage(1);
     };
-    
 
     const openModal = (person: Person): void => {
-        setSelectedPerson(person);
+        console.log("Selected person:", person);
+        setSelectedPerson(person); 
         setIsModalOpen(true);
     };
 
@@ -172,10 +164,8 @@ export default function DetailsPage() {
         }
     };
 
-
     const renderPagination = () => {
         const pages = [];
-
 
         pages.push(
             <button
@@ -187,7 +177,6 @@ export default function DetailsPage() {
                 &laquo;
             </button>
         );
-
 
         const startPage = Math.max(1, currentPage - 2);
         const endPage = Math.min(totalPages, startPage + 4);
@@ -203,7 +192,6 @@ export default function DetailsPage() {
                 </button>
             );
         }
-
 
         pages.push(
             <button
