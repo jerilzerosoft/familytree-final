@@ -19,7 +19,7 @@ export default function FamilyGalleryPage() {
     const fetchImages = async (): Promise<void> => {
       try {
         const response = await axios.get(
-          `${BASE_URL}admin/gallery/`
+          `${BASE_URL}/admin/gallery/`
         );
         console.log("API Response:", response.data);
 
@@ -46,7 +46,8 @@ export default function FamilyGalleryPage() {
   const getImageSource = (imagePath: any) => {
     if (imagePath) {
       return `${BASE_URL}${
-        imagePath.startsWith("/") ? imagePath : "/" + imagePath
+        // imagePath.startsWith("/") ? imagePath : "/" + imagePath
+        imagePath
       }`;
     } else {
       return "/default-avatar.png";

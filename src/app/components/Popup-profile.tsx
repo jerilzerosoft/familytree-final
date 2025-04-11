@@ -30,25 +30,25 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
   const [tab2Access, setTab2Access] = useState(false);
   const [tab3Access, setTab3Access] = useState(false);
   
-
-  
-  const [user, setUser] = useState({
+  const [user, setUser ] = useState({
     role: "user",
     id: "",
     username: ""
   });
   
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setUser({
-        role: "user",
-        id: localStorage.getItem("userId") || "",
-        username: localStorage.getItem("username") || ""
-      });
-    }
+    const storedUser = localStorage.getItem("userId") || "";
+    const storedUsername = localStorage.getItem("username") || "";
+  
+    setUser(prev => ({
+      ...prev,
+      id: storedUser,
+      username: storedUsername
+    }));
   }, []);
   
-  const isAdmin = user?.role === "admin";
+  
+  
 
   const tabMapping: { [key: string]: string } = {
     'Tab 01': 'Basic Info',
@@ -56,101 +56,96 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
     'Tab 03': 'Additional Info'
   };
 
-  
-  const fetchAccessStatus = useCallback(async () => {
-    if(isOpen && person) {
-      if (!user.id) return;
-      
-      try {
-        const res = await axios.get(`${BASE_URL}?userId=${user.id}&targetUserId=${person?.id}`);
-        const personalInfoAccess = res?.data?.access?.find(
-          (item: { tab: string }) => item.tab === 'personal'
-        );
-        
-        const additionalInfoAccess = res?.data?.access?.find(
-          (item: { tab: string }) => item.tab === 'additional'
-        );
-        
-        setTab2Access(personalInfoAccess && personalInfoAccess.status === 'approved');
-        setTab3Access(additionalInfoAccess && additionalInfoAccess.status === 'approved');
-        setAccessStatus(res.data.access);
-        setLastFetchTime(Date.now());
-      } catch (err) {
-        console.error("Access check failed", err);
-      }
-    }
-  }, [isOpen, person]);
-
-  
-  useEffect(() => {
-    if (isOpen && person) {
-      console.log("Popup opened with person:", person); 
-      setRequestedTabs({});
-      fetchAccessStatus();
-    }
-  }, [isOpen, person]);
-  
-  
- 
-  const hasAccess = useCallback((tabName: string) => {
-    return isAdmin || accessStatus.some(item => 
-      item.tab === tabMapping[tabName] && item.status === 'approved'
-    );
-  }, [isAdmin, accessStatus, tabMapping]);
-
-  
-  const handleRequestAccess = async (tabName: string) => {
+// MEMOIZE THE FUNCTION so React doesn't re-create it every render
+const fetchAccessStatus = useCallback(async () => {
+  if (isOpen && person && user?.id) {
     try {
-      setRequestLoading(true);
-  
-      const userId = user.id;
-      const username = user.username;
-      const targetUserId = person?.id; 
-  
-      if (!userId || !username || !targetUserId) {
-        console.error("Missing user info:", { userId, username, targetUserId });
-        alert("Missing user info. Please try logging in again.");
-        return;
-      }
-  
-      const response = await fetch(`${BASE_URL}request-access/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          requestedTab: tabMapping[tabName],
-          userId: userId,
-          username: username,
-          targetUserId: targetUserId, 
-        }),
-      });
-  
-      const result = await response.json();
-  
-      if (response.ok) {
-        setRequestedTabs(prev => ({ ...prev, [tabName]: true }));
-        alert("Request sent successfully!");
-        
-        await fetchAccessStatus();
-      } else {
-        console.error("Failed to send request:", result);
-        alert("Failed to send request: " + (result.error || "Unknown error"));
-      }
-    } catch (error) {
-      console.error("Error sending request:", error);
-      alert("Error sending request: " + (error as Error).message);
-    } finally {
-      setRequestLoading(false);
+      const res = await axios.get(
+        `${BASE_URL}/user/access-status/?userId=${user.id}&targetUserId=${person?.id}`
+      );
+
+      const personalInfoAccess = res?.data?.access?.find(
+        (item: { tab: string }) => item.tab === "personal"
+      );
+      
+      const additionalInfoAccess = res?.data?.access?.find(
+        (item: { tab: string }) => item.tab === "additional"
+      );
+
+      setTab2Access(personalInfoAccess?.status === "approved");
+      setTab3Access(additionalInfoAccess?.status === "approved");
+      setAccessStatus(res.data.access);
+      setLastFetchTime(Date.now());
+    } catch (err) {
+      console.error("Access check failed", err);
     }
-  };
-  
-  
+  }
+}, [isOpen, person, user?.id]);
+
+// FIRST EFFECT: fetch data when conditions match
+useEffect(() => {
+  fetchAccessStatus();
+}, [fetchAccessStatus]);
+
+// SECOND EFFECT: runs when popup opens (set state + fetch access)
+useEffect(() => {
+  if (isOpen && person) {
+    console.log("Popup opened with person:", person);
+    setRequestedTabs({});
+    fetchAccessStatus();
+  }
+}, [isOpen, person, fetchAccessStatus]);
+
+
+const handleRequestAccess = async (tabName: string) => {
+  try {
+    setRequestLoading(true);
+
+    const userId = user.id;
+    const username = user.username;
+    const targetUserId = person?.id;
+
+    if (!userId || !username || !targetUserId) {
+      console.error("Missing user info:", { userId, username, targetUserId });
+      alert("Missing user info. Please try logging in again.");
+      return;
+    }
+
+    const response = await fetch(`${BASE_URL}/request-access/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requestedTab: tabMapping[tabName],
+        userId,
+        username,
+        targetUserId,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      setRequestedTabs(prev => ({ ...prev, [tabName]: true }));
+      alert("Request sent successfully!");
+      await fetchAccessStatus();
+    } else {
+      console.error("Failed to send request:", result);
+      alert("Failed to send request: " + (result.error || "Unknown error"));
+    }
+  } catch (error) {
+    console.error("Error sending request:", error);
+    alert("Error sending request: " + (error as Error).message);
+  } finally {
+    setRequestLoading(false);
+  }
+};
+
   const hasRequestedAccess = (tabName: string) => {
-    return requestedTabs[tabName] || accessStatus.some(item => 
+    return requestedTabs[tabName] || (Array.isArray(accessStatus) && accessStatus.some(item => 
       item.tab === tabMapping[tabName] && item.status === 'pending'
-    );
+    ));
   };
+  
   
 
   const renderRestrictedContent = (tabName: string) => (

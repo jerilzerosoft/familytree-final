@@ -213,7 +213,7 @@ export default function Header({ onSearch = null }) {
                 <>
                   <button
                     onClick={toggleDropdown}
-                    className="bg-white text-black p-2 rounded-full text-sm shadow-md flex items-center gap-2"
+                    className="bg-white text-black p-2 cursor-pointer rounded-full text-sm shadow-md flex items-center gap-2"
                   >
                     <Image src={profile} alt="Profile Icon" width={28} height={28} className="rounded-full" />
                   </button>
@@ -222,13 +222,13 @@ export default function Header({ onSearch = null }) {
                     <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50">
                       <Link
                         href="/profile"
-                        className="block px-4 py-2 text-black hover:bg-gray-100 text-sm"
+                        className="block px-4 py-2 text-black cursor-pointer hover:bg-gray-100 text-sm"
                       >
                         View Profile
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-centre px-4 py-2 hover:bg-gray-100 text-sm text-red-600"
+                        className="w-full text-centre px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm text-red-600"
                       >
                         Logout
                       </button>
@@ -254,14 +254,14 @@ export default function Header({ onSearch = null }) {
             <p className="mb-6 text-sm text-gray-600">You need to log in to access the gallery.</p>
             <button
               onClick={() => router.push("/login")}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full mb-2"
+              className="bg-green-600 text-white px-4 cursor-pointer py-2 rounded hover:bg-green-700 w-full mb-2"
             >
               Go to Login
             </button>
 
             <button
               onClick={() => setShowLoginModal(false)}
-              className="text-gray-500 text-sm hover:underline"
+              className="text-gray-500 cursor-pointer text-sm hover:underline"
             >
               Cancel
             </button>

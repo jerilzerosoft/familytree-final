@@ -148,7 +148,7 @@ const Home = () => {
   const fetchDataFromAPI = async () => {
     try {
     
-      const response = await axios.get(`${BASE_URL}api/get/all/`);
+      const response = await axios.get(`${BASE_URL}/api/get/all/`);
 
       const data = response.data;
       

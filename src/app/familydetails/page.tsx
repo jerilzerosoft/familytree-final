@@ -91,7 +91,7 @@ export default function DetailsPage() {
             
             const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
             
-            let url = `${BASE_URL}admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
+            let url = `${BASE_URL}/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
 
             if (name || path) {
                 if (name && path) {

@@ -21,7 +21,7 @@ const Login = () => {
 
     try {
     
-      const response = await fetch(`${BASE_URL}admin/login/`, {
+      const response = await fetch(`${BASE_URL}/admin/login/`, {
       
         method: "POST",
         headers: {

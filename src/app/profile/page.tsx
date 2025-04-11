@@ -72,7 +72,7 @@ export default function ProfilePage() {
                 }
                 
                 
-                const response = await fetch(`${BASE_URL}admin/get-profile/${userId}/`, {
+                const response = await fetch(`${BASE_URL}/admin/get-profile/${userId}/`, {
                     // const response = await fetch(`https://api.familytreee.zerosoft.in/admin/get-profile/${userId}/`, {
                     method: 'GET',
                     headers: {
@@ -172,7 +172,7 @@ export default function ProfilePage() {
                 profile_picture: userData.personalInfo.avatar
             };
     
-            const response = await fetch(`${BASE_URL}admin/profiles/update/${userId}/`, {
+            const response = await fetch(`${BASE_URL}/admin/profiles/update/${userId}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
