@@ -7,6 +7,7 @@ import Shield from "@/assets/images/shield.jpg";
 import defaultAvatar from "@/assets/images/user.png";
 import axios from 'axios';
 import { BASE_URL } from "@/app/components/Utils/apis"
+
 interface PopupProfileProps {
   isOpen: boolean;
   onClose: () => void;
@@ -31,11 +32,21 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
   
 
   
-  const user = currentUser || { 
+  const [user, setUser] = useState({
     role: "user",
-    id: localStorage.getItem("userId") || "",
-    username: localStorage.getItem("username") || ""
-  };
+    id: "",
+    username: ""
+  });
+  
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUser({
+        role: "user",
+        id: localStorage.getItem("userId") || "",
+        username: localStorage.getItem("username") || ""
+      });
+    }
+  }, []);
   
   const isAdmin = user?.role === "admin";
 
@@ -52,8 +63,14 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
       
       try {
         const res = await axios.get(`${BASE_URL}?userId=${user.id}&targetUserId=${person?.id}`);
-        const personalInfoAccess = res.data.access.find((item: { tab: string }) => item.tab === 'personal');
-        const additionalInfoAccess = res.data.access.find((item: { tab: string }) => item.tab === 'additional');
+        const personalInfoAccess = res?.data?.access?.find(
+          (item: { tab: string }) => item.tab === 'personal'
+        );
+        
+        const additionalInfoAccess = res?.data?.access?.find(
+          (item: { tab: string }) => item.tab === 'additional'
+        );
+        
         setTab2Access(personalInfoAccess && personalInfoAccess.status === 'approved');
         setTab3Access(additionalInfoAccess && additionalInfoAccess.status === 'approved');
         setAccessStatus(res.data.access);

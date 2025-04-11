@@ -1,7 +1,3 @@
-//  @typescript-eslint/no-explicit-any
-//  @typescript-eslint/no-unused-vars
-// @typescript-eslint/no-unused-vars
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -13,30 +9,39 @@ import { Person } from "@/app/components/Utils/interface";
 import PopupProfile from "@/app/components/Popup-profile";
 import { IoIosCall, IoMdMail } from "react-icons/io";
 import { BASE_URL } from "@/app/components/Utils/apis"
+
 export default function DetailsPage() {
     const [nameQuery, setNameQuery] = useState('');
     const [pathQuery, setPathQuery] = useState('');
     const [results, setResults] = useState<Person[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-
+    const [token, setToken] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(false);
 
-   
+    
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedToken = localStorage.getItem('authToken');
+            setToken(storedToken);
+        }
+    }, []);
+
+    
     const handleHeaderSearch = (query) => {
         if (query) {
             setNameQuery(query);
-            setPathQuery(''); 
-            
+            setPathQuery('');
             setCurrentPage(1);
             fetchProfiles(query, '');
         }
     };
 
+    
     const debounce = (func: Function, delay: number) => {
         let timeoutId: NodeJS.Timeout;
         return (...args: any[]) => {
@@ -45,6 +50,7 @@ export default function DetailsPage() {
         };
     };
 
+    
     const debouncedSearch = useCallback(
         debounce(() => {
             setCurrentPage(1);
@@ -53,31 +59,38 @@ export default function DetailsPage() {
         [nameQuery, pathQuery]
     );
 
+    
     useEffect(() => {
         if (nameQuery !== '' || pathQuery !== '') {
             debouncedSearch();
         }
     }, [nameQuery, pathQuery, debouncedSearch]);
 
+    
     useEffect(() => {
         fetchProfiles(nameQuery, pathQuery);
     }, [currentPage, pageSize]);
+
+    
     useEffect(() => {
-        
-        const storedQuery = localStorage.getItem('headerSearchQuery');
-        if (storedQuery) {
-            setNameQuery(storedQuery);
-            
-            localStorage.removeItem('headerSearchQuery');
-            
-            setCurrentPage(1);
-            fetchProfiles(storedQuery, '');
+        if (typeof window !== 'undefined') {
+            const storedQuery = localStorage.getItem('headerSearchQuery');
+            if (storedQuery) {
+                setNameQuery(storedQuery);
+                localStorage.removeItem('headerSearchQuery');
+                setCurrentPage(1);
+                fetchProfiles(storedQuery, '');
+            }
         }
     }, []);
+
+   
     const fetchProfiles = async (name = nameQuery, path = pathQuery) => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('authToken');
+            
+            const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+            
             let url = `${BASE_URL}admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
 
             if (name || path) {
@@ -134,34 +147,39 @@ export default function DetailsPage() {
         }
     };
 
+    
     const handleSearch = () => {
         setCurrentPage(1);
         fetchProfiles(nameQuery, pathQuery);
     };
 
+    
     const handleReset = () => {
         setNameQuery('');
         setPathQuery('');
         setCurrentPage(1);
-        // Clear search results
         fetchProfiles('', '');
     };
 
+    
     const openModal = (person: Person): void => {
         setSelectedPerson(person);
         setIsModalOpen(true);
     };
 
+    
     const closeModal = () => {
         setIsModalOpen(false);
     };
 
+    
     const handlePageChange = (newPage: number) => {
         if (newPage > 0 && newPage <= totalPages) {
             setCurrentPage(newPage);
         }
     };
 
+    
     const renderPagination = () => {
         const pages = [];
 
