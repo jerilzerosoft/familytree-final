@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { UserData } from "@/app/components/Utils/interface";
-
+import Avator from "@/assets/images/user.png";
+import { BASE_URL } from "@/app/components/Utils/apis"
 export default function ProfilePage() {
     const [userData, setUserData] = useState({
         personalInfo: {
@@ -14,7 +15,7 @@ export default function ProfilePage() {
             phoneNumber: '',
             telephoneNumber: '',
             email: '',
-            avatar: '/assets/images/456322.webp',
+            avatar: 'Avator',
             mykadNumber: '',
             username: '',
             userRole: '',
@@ -42,6 +43,7 @@ export default function ProfilePage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false); // New state to track edit mode
 
     const handleChange = (
         section: keyof UserData,
@@ -57,8 +59,6 @@ export default function ProfilePage() {
         }));
     };
 
- 
-
     useEffect(() => {
         const loadUserData = async () => {
             setIsLoading(true);
@@ -72,8 +72,8 @@ export default function ProfilePage() {
                 }
                 
                 
-                // const response = await fetch(`http://localhost:8000/admin/get-profile/${userId}/`, {
-                    const response = await fetch(`https://api.familytreee.zerosoft.in/admin/get-profile/${userId}/`, {
+                const response = await fetch(`${BASE_URL}admin/get-profile/${userId}/`, {
+                    // const response = await fetch(`https://api.familytreee.zerosoft.in/admin/get-profile/${userId}/`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ export default function ProfilePage() {
                         phoneNumber: profile.phone || '',
                         telephoneNumber: profile.phone || '', 
                         email: profile.email || '',
-                        avatar: profile.profile_picture || '/assets/images/456322.webp',
+                        avatar: profile.profile_picture || ' Avator',
                         mykadNumber: profile.mykad_number || '',
                         username: profile.username || '',
                         userRole: profile.user_role || '',
@@ -144,15 +144,15 @@ export default function ProfilePage() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
-        
+    
         try {
             const token = localStorage.getItem('authToken');
-            
-            if (!token) {
-                throw new Error('Authentication token not found');
+            const userId = localStorage.getItem('userId');
+    
+            if (!token || !userId) {
+                throw new Error('Missing authentication or user ID');
             }
-            
-            
+    
             const apiData = {
                 full_name: `${userData.personalInfo.firstName} ${userData.personalInfo.lastName}`,
                 email: userData.personalInfo.email,
@@ -171,9 +171,8 @@ export default function ProfilePage() {
                 additional_info: userData.professionalInfo.additionalInfo,
                 profile_picture: userData.personalInfo.avatar
             };
-
-            
-            const response = await fetch(`http://localhost:8000/admin/update-profile/${userData.personalInfo.userId}`, {
+    
+            const response = await fetch(`${BASE_URL}admin/profiles/update/${userId}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -181,26 +180,30 @@ export default function ProfilePage() {
                 },
                 body: JSON.stringify(apiData),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to update profile');
             }
-
+    
             alert('Profile updated successfully!');
-        } catch (error) {
+            setIsEditMode(false); // Exit edit mode after successful save
+        } catch (error: any) {
             console.error('Error updating profile:', error);
             alert(`Failed to update profile: ${error.message}`);
         }
     };
-
+    
     const handleLogout = () => {
-        // Clear auth token
         localStorage.removeItem('authToken');
-        // Additional cleanup if needed
         sessionStorage.clear();
         // Redirect to login page
         window.location.href = '/login';
+    };
+
+    // New function to toggle edit mode
+    const toggleEditMode = () => {
+        setIsEditMode(!isEditMode);
     };
 
     if (isLoading) {
@@ -252,7 +255,7 @@ export default function ProfilePage() {
                         <div className="flex items-center">
                             <div className="relative w-24 h-24 mr-6">
                                 <Image
-                                    src={userData.personalInfo.avatar}
+                                    src={userData.personalInfo.avatar }
                                     alt="Profile"
                                     layout="fill"
                                     className="rounded-full border-4 border-white shadow-lg object-cover"
@@ -271,7 +274,13 @@ export default function ProfilePage() {
                                 </p>
                             </div>
                         </div>
-                        <div>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={toggleEditMode}
+                                className={`px-4 py-2 ${isEditMode ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg transition duration-300`}
+                            >
+                                {isEditMode ? 'Cancel Edit' : 'Edit Profile'}
+                            </button>
                             <button 
                                 onClick={handleLogout}
                                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
@@ -292,7 +301,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.personalInfo.firstName}
                                     onChange={(e) => handleChange('personalInfo', 'firstName', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -301,7 +311,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.personalInfo.lastName}
                                     onChange={(e) => handleChange('personalInfo', 'lastName', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -310,7 +321,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.personalInfo.phoneNumber}
                                     onChange={(e) => handleChange('personalInfo', 'phoneNumber', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -319,7 +331,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.personalInfo.mykadNumber}
                                     onChange={(e) => handleChange('personalInfo', 'mykadNumber', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div className="md:col-span-2">
@@ -328,7 +341,8 @@ export default function ProfilePage() {
                                     type="email"
                                     value={userData.personalInfo.email}
                                     onChange={(e) => handleChange('personalInfo', 'email', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -337,7 +351,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.personalInfo.race}
                                     onChange={(e) => handleChange('personalInfo', 'race', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -361,18 +376,20 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.addressInfo.address}
                                     onChange={(e) => handleChange('addressInfo', 'address', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                                <div className="flex items-center border border-gray-300 rounded-lg p-3 focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500">
+                                <div className={`flex items-center border border-gray-300 rounded-lg p-3 ${isEditMode ? 'focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500' : 'bg-gray-100'}`}>
                                     <span className="mr-2">🇲🇾</span>
                                     <input
                                         type="text"
                                         value={userData.addressInfo.country}
                                         onChange={(e) => handleChange('addressInfo', 'country', e.target.value)}
                                         className="flex-grow outline-none bg-transparent"
+                                        readOnly={!isEditMode}
                                     />
                                 </div>
                             </div>
@@ -382,7 +399,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.addressInfo.pinCode}
                                     onChange={(e) => handleChange('addressInfo', 'pinCode', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -391,7 +409,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.addressInfo.fathersName}
                                     onChange={(e) => handleChange('addressInfo', 'fathersName', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -400,7 +419,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.addressInfo.mothersName}
                                     onChange={(e) => handleChange('addressInfo', 'mothersName', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -409,7 +429,8 @@ export default function ProfilePage() {
                                     type="date"
                                     value={userData.addressInfo.dateOfBirth}
                                     onChange={(e) => handleChange('addressInfo', 'dateOfBirth', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -418,7 +439,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.addressInfo.birthPlace}
                                     onChange={(e) => handleChange('addressInfo', 'birthPlace', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                         </div>
@@ -433,7 +455,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.professionalInfo.nation}
                                     onChange={(e) => handleChange('professionalInfo', 'nation', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -442,7 +465,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.professionalInfo.career}
                                     onChange={(e) => handleChange('professionalInfo', 'career', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -451,7 +475,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.professionalInfo.employment}
                                     onChange={(e) => handleChange('professionalInfo', 'employment', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div>
@@ -460,7 +485,8 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.professionalInfo.workAddress}
                                     onChange={(e) => handleChange('professionalInfo', 'workAddress', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                             <div className="md:col-span-2">
@@ -469,31 +495,38 @@ export default function ProfilePage() {
                                     type="text"
                                     value={userData.professionalInfo.additionalInfo}
                                     onChange={(e) => handleChange('professionalInfo', 'additionalInfo', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="mb-8">
-                        <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50">
-                            <input
-                                type="checkbox"
-                                checked={userData.agreeToTerms}
-                                // onChange={handleCheckboxChange}
-                                className="h-5 w-5 text-green-500 rounded focus:ring-green-500 mr-2"
-                            />
-                            <label className="text-gray-700">
-                                The above information is correct
-                            </label>
+                    {isEditMode && (
+                        <div className="mb-8">
+                            <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50">
+                                <input
+                                    type="checkbox"
+                                    checked={userData.agreeToTerms}
+                                    onChange={(e) => handleChange('agreeToTerms', 'agreeToTerms', e.target.checked)}
+                                    className="h-5 w-5 text-green-500 rounded focus:ring-green-500 mr-2"
+                                />
+                                <label className="text-gray-700">
+                                    The above information is correct
+                                </label>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <div className="flex justify-end">
                         <button
                             type="submit"
-                            disabled={!userData.agreeToTerms}
-                            className={`px-6 py-3 font-medium rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 ${userData.agreeToTerms ? 'bg-yellow-300 text-black hover:bg-yellow-400' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                            disabled={!isEditMode || (isEditMode && !userData.agreeToTerms)}
+                            className={`px-6 py-3 font-medium rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 ${
+                                isEditMode && userData.agreeToTerms 
+                                ? 'bg-yellow-300 text-black hover:bg-yellow-400' 
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
                         >
                             Save Profile
                         </button>

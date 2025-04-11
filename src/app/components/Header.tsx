@@ -10,7 +10,7 @@ import Search from "@/assets/images/search-icon.png";
 import Galary from "@/assets/images/galary.png";
 import profile from "@/assets/images/user-icon.png";
 
-export default function Header() {
+export default function Header({ onSearch = null }) {
   const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -25,12 +25,10 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    
     localStorage.removeItem("authToken");
     localStorage.removeItem("userId");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("username");
-
     window.location.href = "/login";
   };
 
@@ -47,19 +45,16 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
-  
   const handlegallary = () => {
     const token = localStorage.getItem("authToken");
     if (token) {
-      router.push("/gallery");
+      router.push("/familygallary");
     } else {
       setShowLoginModal(true);
     }
   };
 
   useEffect(() => {
-   
     const token = localStorage.getItem("authToken");
     if (token) {
       setIsLoggedIn(true);
@@ -70,8 +65,6 @@ export default function Header() {
     router.push("/");
   };
 
-
-
   const handleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
   };
@@ -79,11 +72,23 @@ export default function Header() {
   const handleSearchSubmit = () => {
     const query = searchInputRef.current?.value.trim();
     if (query) {
-      router.push(`/familydetails?search=${encodeURIComponent(query)}`);
+      if (onSearch && typeof onSearch === 'function') {
+       
+        onSearch(query);
+        setIsSearchOpen(false);
+      } else {
+        
+        localStorage.setItem('headerSearchQuery', query);
+        router.push('/familydetails');
+      }
+      
+      
+      if (searchInputRef.current) {
+        searchInputRef.current.value = "";
+      }
     }
   };
 
- 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearchSubmit();
@@ -134,7 +139,7 @@ export default function Header() {
               isSearchOpen ? "bg-white rounded-full shadow-md px-2" : "bg-transparent"
             }`}
           >
-            {/* Close X Icon - Only when search is open */}
+            
             {isSearchOpen && (
               <div
                 className="flex items-center justify-center cursor-pointer text-black"
@@ -262,6 +267,5 @@ export default function Header() {
         </div>
       )}
     </>
-
   );
 }

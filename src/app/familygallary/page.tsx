@@ -7,7 +7,7 @@ import axios from "axios";
 import Image from "next/image";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
-
+import { BASE_URL } from "@/app/components/Utils/apis"
 export default function FamilyGalleryPage() {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -19,7 +19,7 @@ export default function FamilyGalleryPage() {
     const fetchImages = async (): Promise<void> => {
       try {
         const response = await axios.get(
-          `https://api.familytreee.zerosoft.in/admin/gallery/`
+          `${BASE_URL}admin/gallery/`
         );
         console.log("API Response:", response.data);
 
@@ -45,7 +45,7 @@ export default function FamilyGalleryPage() {
 
   const getImageSource = (imagePath: any) => {
     if (imagePath) {
-      return `https://api.familytreee.zerosoft.in${
+      return `${BASE_URL}${
         imagePath.startsWith("/") ? imagePath : "/" + imagePath
       }`;
     } else {

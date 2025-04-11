@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Email from "@/assets/images/mail-icon.png";
 import Password from "@/assets/images/password-icon.png";
-
+import { BASE_URL } from "@/app/components/Utils/apis"
 
 
 const Login = () => {
@@ -20,9 +20,9 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("https://api.familytreee.zerosoft.in/admin/login/",{
-      // const response = await fetch("http://localhost:8000/admin/login/", {
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/login/`, {
+    
+      const response = await fetch(`${BASE_URL}admin/login/`, {
+      
         method: "POST",
         headers: {
           "Content-Type": "application/json",

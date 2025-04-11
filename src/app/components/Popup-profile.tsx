@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import Shield from "@/assets/images/shield.jpg";
 import defaultAvatar from "@/assets/images/user.png";
 import axios from 'axios';
-
+import { BASE_URL } from "@/app/components/Utils/apis"
 interface PopupProfileProps {
   isOpen: boolean;
   onClose: () => void;
@@ -51,7 +51,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
       if (!user.id) return;
       
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/user/access-status/?userId=${user.id}&targetUserId=${person?.id}`);
+        const res = await axios.get(`${BASE_URL}?userId=${user.id}&targetUserId=${person?.id}`);
         const personalInfoAccess = res.data.access.find((item: { tab: string }) => item.tab === 'personal');
         const additionalInfoAccess = res.data.access.find((item: { tab: string }) => item.tab === 'additional');
         setTab2Access(personalInfoAccess && personalInfoAccess.status === 'approved');
@@ -74,29 +74,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
   }, [isOpen, person]);
   
   
-  // useEffect(() => {
-  //   if (!isOpen) return;
-    
-   
-  //   fetchAccessStatus();
-    
-    
-  //   const intervalId = setInterval(() => {
-  //     fetchAccessStatus();
-  //   }, 10000); 
-    
-    
-  //   return () => clearInterval(intervalId);
-  // }, [isOpen, fetchAccessStatus]);
-  
-  
-  // useEffect(() => {
-  //   if (Object.values(requestedTabs).some(value => value === true)) {
-  //     fetchAccessStatus();
-  //   }
-  // }, [requestedTabs, fetchAccessStatus]);
-
-  
+ 
   const hasAccess = useCallback((tabName: string) => {
     return isAdmin || accessStatus.some(item => 
       item.tab === tabMapping[tabName] && item.status === 'approved'
@@ -118,7 +96,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
         return;
       }
   
-      const response = await fetch("http://127.0.0.1:8000/request-access/", {
+      const response = await fetch(`${BASE_URL}request-access/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

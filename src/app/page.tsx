@@ -13,8 +13,10 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { useRouter } from "next/navigation";
 import { ApiFeature, ApiGalleryFeature, GalleryFeature } from "@/app/components/Utils/interface";
-
+import { BASE_URL } from "@/app/components/Utils/apis"
 const Home = () => {
+
+
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -145,8 +147,9 @@ const Home = () => {
 
   const fetchDataFromAPI = async () => {
     try {
-      const response = await axios.get('https://api.familytreee.zerosoft.in/api/get/all/');
-      
+    
+      const response = await axios.get(`${BASE_URL}api/get/all/`);
+
       const data = response.data;
       
   
