@@ -323,11 +323,11 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <div 
-                                className="relative w-24 h-24 mr-6 cursor-pointer group"
+                                className="relative w-24 h-24 mr-6  group"
                                 onClick={isEditMode ? triggerFileInput : null}
                             >
                                 {isEditMode && (
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute inset-0 cursor-pointer bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span className="text-white text-sm font-medium">Change Photo</span>
                                     </div>
                                 )}
