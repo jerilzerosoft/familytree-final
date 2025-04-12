@@ -190,13 +190,13 @@ const Home = () => {
       }
       
       if (data.gallery_features && data.gallery_features.length > 0) {
-        const apiGalleryFeatures: GalleryFeature[] = data.gallery_features.map((feature: ApiGalleryFeature) => ({
+        const apiGalleryFeatures= data.gallery_features.map((feature: ApiGalleryFeature) => ({
           id: feature.id,
           title: feature.title,
           description: feature.description,
           icon: feature.icon ? (feature.icon as unknown as StaticImageData) : HandIcon
         }));
-        // setGalleryFeatures(apiGalleryFeatures);
+        setGalleryFeatures(apiGalleryFeatures);
       }
       
     } catch (err) {

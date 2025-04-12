@@ -1,347 +1,647 @@
 "use client";
-
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
-import Avator from "@/assets/images/user.png";
-import { Person } from "@/app/components/Utils/interface";
-import PopupProfile from "@/app/components/Popup-profile";
-import { IoIosCall, IoMdMail } from "react-icons/io";
-import { BASE_URL } from "@/app/components/Utils/apis"
+import { UserData } from "@/app/components/Utils/interface";
+import { BASE_URL } from "@/app/components/Utils/apis";
+// Import default avatar
+import DefaultAvatar from "@/assets/images/user.png";
 
-export default function DetailsPage() {
-    const [nameQuery, setNameQuery] = useState('');
-    const [pathQuery, setPathQuery] = useState('');
-    const [results, setResults] = useState<Person[]>([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-    const [token, setToken] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [pageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
-    const [loading, setLoading] = useState(false);
-
-    
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedToken = localStorage.getItem('authToken');
-            setToken(storedToken);
+export default function ProfilePage() {
+    const [userData, setUserData] = useState({
+        personalInfo: {
+            firstName: '',
+            lastName: '',
+            phoneNumber: '',
+            telephoneNumber: '',
+            email: '',
+            avatar: '',
+            mykadNumber: '',
+            username: '',
+            userRole: '',
+            userId: '',
+            race: '',
+        },
+        addressInfo: {
+            address: '',
+            country: 'Malaysia',
+            pinCode: '',
+            fathersName: '',
+            mothersName: '',
+            dateOfBirth: '',
+            birthPlace: '',
+        },
+        professionalInfo: {
+            nation: '',
+            career: '',
+            employment: '',
+            workAddress: '',
+            additionalInfo: '',
         }
-    }, []);
+    });
 
-    
-    const handleHeaderSearch = (query) => {
-        if (query) {
-            setNameQuery(query);
-            setPathQuery('');
-            setCurrentPage(1);
-            fetchProfiles(query, '');
-        }
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null); // Store the selected file for later upload
+    const fileInputRef = useRef(null);
+
+    const handleChange = (
+        section: keyof UserData,
+        field: string,
+        value: string | boolean
+    ) => {
+        setUserData((prevData) => ({
+            ...prevData,
+            [section]: {
+                ...(typeof prevData[section] === 'object' && prevData[section] !== null ? prevData[section] : {}),
+                [field]: value,
+            },
+        }));
     };
 
     
-    const debounce = (func: Function, delay: number) => {
-        let timeoutId: NodeJS.Timeout;
-        return (...args: any[]) => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func(...args), delay);
-        };
-    };
-
-    
-    const debouncedSearch = useCallback(
-        debounce(() => {
-            setCurrentPage(1);
-            fetchProfiles(nameQuery, pathQuery);
-        }, 500),
-        [nameQuery, pathQuery]
-    );
-
-    
-    useEffect(() => {
-        if (nameQuery !== '' || pathQuery !== '') {
-            debouncedSearch();
-        }
-    }, [nameQuery, pathQuery, debouncedSearch]);
-
-    
-    useEffect(() => {
-        fetchProfiles(nameQuery, pathQuery);
-    }, [currentPage, pageSize]);
-
-    
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedQuery = localStorage.getItem('headerSearchQuery');
-            if (storedQuery) {
-                setNameQuery(storedQuery);
-                localStorage.removeItem('headerSearchQuery');
-                setCurrentPage(1);
-                fetchProfiles(storedQuery, '');
-            }
-        }
-    }, []);
-
-   
-    const fetchProfiles = async (name = nameQuery, path = pathQuery) => {
-        setLoading(true);
+    const uploadProfileImage = async (file) => {
         try {
+            setIsUploading(true);
+            const token = localStorage.getItem('authToken');
+            const userId = localStorage.getItem('userId');
             
-            const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+            if (!token || !userId) {
+                throw new Error('Authentication credentials not found');
+            }
             
-            let url = `${BASE_URL}/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
+            // Create form data
+            const formData = new FormData();
+            formData.append('profile_picture', file);
+            
+            // Upload image
+            const response = await fetch(`${BASE_URL}/admin/upload-profile-picture/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to upload profile picture');
+            }
+            
+            const data = await response.json();
+            
+            // Update user data with the new image path from server
+            handleChange('personalInfo', 'avatar', `${BASE_URL}${data.profile_picture}`);
+            
+            return data.profile_picture;
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            alert('Failed to upload profile picture: ' + error.message);
+            return null;
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
-            if (name || path) {
-                if (name && path) {
-                    url += `&search=${encodeURIComponent(`${name} ${path}`)}`;
-                } else {
-                    const searchTerm = name || path;
-                    url += `&search=${encodeURIComponent(searchTerm)}`;
+    // Handle profile picture selection - now only shows preview without uploading
+    const handleProfilePictureChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Store file for later upload
+            setSelectedFile(file);
+            
+            // Show preview immediately
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // Function to trigger file input click
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
+
+    useEffect(() => {
+        const loadUserData = async () => {
+            setIsLoading(true);
+            try {
+                const token = localStorage.getItem('authToken');
+                const userId = localStorage.getItem('userId');
+                
+                if (!token) {
+                    throw new Error('Authentication token not found');
+                }
+                
+                const response = await fetch(`${BASE_URL}/admin/get-profile/${userId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile data');
+                }
+                
+                const data = await response.json();
+                const profile = data.profile;
+                
+                if (!profile) {
+                    throw new Error('No profile data found');
+                }
+                
+                const nameParts = (profile.full_name || '').split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+
+                
+                let avatarUrl = profile.profile_picture || '';
+                if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:')) {
+                    avatarUrl = `${BASE_URL}${avatarUrl}`;
+                }
+                
+                
+                if (!avatarUrl || avatarUrl.trim() === '') {
+                    avatarUrl = '';
+                }
+
+                setUserData({
+                    personalInfo: {
+                        firstName,
+                        lastName,
+                        phoneNumber: profile.phone || '',
+                        telephoneNumber: profile.phone || '', 
+                        email: profile.email || '',
+                        avatar: avatarUrl,
+                        mykadNumber: profile.mykad_number || '',
+                        username: profile.username || '',
+                        userRole: profile.user_role || '',
+                        userId: profile.user_id || '',
+                        race: profile.race || '',
+                    },
+                    addressInfo: {
+                        address: profile.home_address || '',
+                        country: profile.nationality || 'Malaysia',
+                        pinCode: profile.postcode || '',
+                        fathersName: profile.fathers_name || '',
+                        mothersName: profile.mothers_name || '',
+                        dateOfBirth: profile.date_of_birth || '',
+                        birthPlace: profile.place_of_birth || '',
+                    },
+                    professionalInfo: {
+                        nation: profile.nationality || '',
+                        career: profile.occupation || '',
+                        employment: profile.occupation || '', 
+                        workAddress: profile.work_address || '',
+                        additionalInfo: profile.additional_info || '',
+                    }
+                });
+                
+               
+                if (avatarUrl) {
+                    setImagePreview(avatarUrl);
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadUserData();
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+    
+        try {
+            const token = localStorage.getItem('authToken');
+            const userId = localStorage.getItem('userId');
+    
+            if (!token || !userId) {
+                throw new Error('Missing authentication or user ID');
+            }
+            
+            // First upload image if a new one was selected
+            let profilePicture = userData.personalInfo.avatar;
+            if (selectedFile) {
+                const uploadedImagePath = await uploadProfileImage(selectedFile);
+                if (uploadedImagePath) {
+                    profilePicture = `${BASE_URL}${uploadedImagePath}`;
                 }
             }
-
-            const response = await fetch(url, {
-                method: 'GET',
+    
+            const apiData = {
+                full_name: `${userData.personalInfo.firstName} ${userData.personalInfo.lastName}`,
+                email: userData.personalInfo.email,
+                phone: userData.personalInfo.phoneNumber,
+                home_address: userData.addressInfo.address,
+                postcode: userData.addressInfo.pinCode,
+                date_of_birth: userData.addressInfo.dateOfBirth,
+                place_of_birth: userData.addressInfo.birthPlace,
+                nationality: userData.professionalInfo.nation,
+                occupation: userData.professionalInfo.career,
+                work_address: userData.professionalInfo.workAddress,
+                mykad_number: userData.personalInfo.mykadNumber,
+                race: userData.personalInfo.race,
+                fathers_name: userData.addressInfo.fathersName,
+                mothers_name: userData.addressInfo.mothersName,
+                additional_info: userData.professionalInfo.additionalInfo,
+                profile_picture: profilePicture
+            };
+    
+            const response = await fetch(`${BASE_URL}/admin/profiles/update/${userId}/`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
+                body: JSON.stringify(apiData),
             });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setResults(data.profiles.map((profile: any) => ({
-                    id: profile.id,
-                    user_id: profile.user_id,
-                    name: profile.full_name,
-                    phone: profile.phone || "N/A",
-                    email: profile.email,
-                    avatar: profile.profile_picture || Avator,
-                    date_of_birth: profile.date_of_birth || "N/A",
-                    place_of_birth: profile.place_of_birth || "N/A",
-                    address: profile.home_address || "N/A",
-                    country: profile.nationality || "N/A",
-                    pin_code: profile.postcode || "N/A",
-                    fathers_name: profile.fathers_name || "N/A",
-                    mothers_name: profile.mothers_name || "N/A",
-                    nation: profile.nationality || "N/A",
-                    career: profile.occupation || "N/A",
-                    employment: profile.occupation || "N/A",
-                    work_address: profile.work_address || "N/A",
-                    additional_info: profile.additional_info || "N/A",
-                    mykad_number: profile.mykad_number
-                })));
-
-                setTotalPages(data.pagination.total_pages);
-                setTotalItems(data.pagination.total_items);
-            } else {
-                console.error("Failed to fetch profiles:", data.error);
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update profile');
             }
-        } catch (error) {
-            console.error("Error fetching profiles:", error);
-        } finally {
-            setLoading(false);
+    
+            alert('Profile updated successfully!');
+            // Reset the selected file since it's been uploaded
+            setSelectedFile(null);
+            setIsEditMode(false); // Exit edit mode after successful save
+        } catch (error: any) {
+            console.error('Error updating profile:', error);
+            alert(`Failed to update profile: ${error.message}`);
         }
     };
-
     
-    const handleSearch = () => {
-        setCurrentPage(1);
-        fetchProfiles(nameQuery, pathQuery);
+    const handleLogout = () => {
+        localStorage.removeItem('authToken');
+        sessionStorage.clear();
+        // Redirect to login page
+        window.location.href = '/login';
     };
 
-    
-    const handleReset = () => {
-        setNameQuery('');
-        setPathQuery('');
-        setCurrentPage(1);
-        fetchProfiles('', '');
-    };
-
-    
-    const openModal = (person: Person): void => {
-        setSelectedPerson(person);
-        setIsModalOpen(true);
-    };
-
-    
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
-
-    
-    const handlePageChange = (newPage: number) => {
-        if (newPage > 0 && newPage <= totalPages) {
-            setCurrentPage(newPage);
+    // Toggle edit mode and reset image preview if canceling
+    const toggleEditMode = () => {
+        if (isEditMode) {
+            // If canceling edit mode, reset any unsaved changes including image preview
+            setImagePreview(userData.personalInfo.avatar || null);
+            setSelectedFile(null);
         }
+        setIsEditMode(!isEditMode);
     };
 
-    
-    const renderPagination = () => {
-        const pages = [];
-
-        pages.push(
-            <button
-                key="prev"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-3 py-1 mx-1 cursor-pointer rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
-            >
-                &laquo;
-            </button>
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex justify-center items-center bg-gray-100">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-yellow-300 border-t-transparent"></div>
+                    <p className="mt-2 text-gray-700">Loading profile...</p>
+                </div>
+            </div>
         );
+    }
 
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, startPage + 4);
-
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(
-                <button
-                    key={i}
-                    onClick={() => handlePageChange(i)}
-                    className={`px-3 py-1 mx-1 cursor-pointer rounded ${currentPage === i ? 'bg-green-700 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-                >
-                    {i}
-                </button>
-            );
-        }
-
-        pages.push(
-            <button
-                key="next"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`px-3 py-1 mx-1 cursor-pointer rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
-            >
-                &raquo;
-            </button>
+    if (error) {
+        return (
+            <div className="min-h-screen flex justify-center items-center bg-gray-100">
+                <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+                    <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+                    <p className="text-gray-700">{error}</p>
+                    <button 
+                        onClick={() => window.location.reload()}
+                        className="mt-4 px-4 py-2 bg-yellow-300 text-black rounded-lg hover:bg-yellow-400"
+                    >
+                        Try Again
+                    </button>
+                    <button 
+                        onClick={() => window.location.href = '/login'}
+                        className="mt-4 ml-2 px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
+                    >
+                        Back to Login
+                    </button>
+                </div>
+            </div>
         );
+    }
 
-        return pages;
-    };
+    // Determine the image source to use
+    const displayImageSrc = imagePreview || userData.personalInfo.avatar || DefaultAvatar.src;
 
     return (
         <div className="bg-gray-100">
             <div className="text-white text-center inner-banner">
-                <Header onSearch={handleHeaderSearch} />
+                <Header />
                 <div className="flex justify-center items-center">
-                    <h1 className="text-2xl md:text-3xl lg:text-5xl font-bold shadow-md">
-                        Search Family Members
-                    </h1>
+                    <h1 className="text-2xl md:text-5xl font-bold shadow-md">Profile</h1>
                 </div>
             </div>
 
-            <div className="py-6 md:py-8 lg:py-10 px-4 container mx-auto w-full mt-4 md:mt-6 lg:mt-8">
-                <div className='border-1 border-gray-400 rounded-lg p-4 md:p-5 lg:p-6'>
-                    <h2 className="text-xl md:text-2xl font-semibold mb-3 md:mb-4">Search</h2>
-                    <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 md:gap-4">
-                        <input
-                            type="text"
-                            placeholder="First Name"
-                            className="w-full sm:w-[calc(50%-8px)] lg:w-1/3 border-1 border-gray-500 rounded-xl h-12 p-2"
-                            value={nameQuery}
-                            onChange={(e) => setNameQuery(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Last Name/Email/ID"
-                            className="w-full sm:w-[calc(50%-8px)] lg:w-1/3 border-1 border-gray-500 rounded-xl h-12 p-2"
-                            value={pathQuery}
-                            onChange={(e) => setPathQuery(e.target.value)}
-                        />
-                        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
-                            <button
-                                onClick={handleSearch}
-                                className="w-full sm:w-auto px-6 md:px-8 py-3 bg-green-700 cursor-pointer text-white rounded-4xl hover:bg-green-800"
+            <div className="container mx-auto mt-12 overflow-hidden">
+                <div className="p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <div 
+                                className="relative w-24 h-24 mr-6 cursor-pointer group"
+                                onClick={isEditMode ? triggerFileInput : null}
                             >
-                                Search
-                            </button>
-                            <button
-                                onClick={handleReset}
-                                className="w-full sm:w-auto px-6 md:px-8 py-3 bg-gray-400 cursor-pointer text-white rounded-4xl hover:bg-gray-500"
-                            >
-                                Reset
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="pb-12 md:pb-16 px-4 container mx-auto">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6">
-                    <h2 className="text-lg md:text-xl font-semibold mb-2 sm:mb-0">Search Results</h2>
-                    <p className="text-sm text-gray-600">
-                        Showing {results.length} of {totalItems} Results
-                    </p>
-                </div>
-
-                {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-2">
-                            {results.length > 0 ? (
-                                results.map((person) => (
-                                    <div
-                                        key={person.id}
-                                        className="border border-gray-400 rounded-lg p-4 md:p-6 lg:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-lg"
-                                    >
-                                        <div className="relative w-16 h-16 flex-shrink-0 mx-auto sm:mx-0">
-                                            <Image
-                                                src={person.avatar}
-                                                alt="Profile"
-                                                layout="fill"
-                                                objectFit="cover"
-                                                className="rounded-full"
-                                            />
-                                        </div>
-                                        <div className="flex-grow text-center sm:text-left">
-                                            <h3 className="font-bold text-lg">{person.name}</h3>
-                                            <div className="flex items-center text-sm mt-1 justify-center sm:justify-start">
-                                                <IoIosCall className="text-black mr-2" />
-                                                <span>Telephone (C): {person.phone}</span>
-                                            </div>
-                                            <div className="flex items-center text-sm mt-1 justify-center sm:justify-start">
-                                                <IoMdMail className="text-black mr-2" />
-                                                <span>Email (D): {person.email}</span>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => openModal(person)}
-                                            className="bg-yellow-300 text-black px-4 sm:px-6 py-3 sm:py-4 cursor-pointer rounded-full text-sm font-medium hover:bg-yellow-400 w-full sm:w-auto"
-                                        >
-                                            View Details
-                                        </button>
+                                {isEditMode && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-white text-sm font-medium">Change Photo</span>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="col-span-1 lg:col-span-2 text-center py-8">
-                                    <p className="text-gray-500">No results found. Please try a different search term.</p>
-                                </div>
-                            )}
-                        </div>
-
-                        {totalPages > 1 && (
-                            <div className="flex justify-center mt-6 md:mt-8">
-                                {renderPagination()}
+                                )}
+                                {isUploading && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full">
+                                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-3 border-white border-t-transparent"></div>
+                                    </div>
+                                )}
+                                <Image
+                                    src={displayImageSrc}
+                                    alt="Profile"
+                                    width={96}
+                                    height={96}
+                                    className="rounded-full border-4 border-white shadow-lg object-cover w-24 h-24"
+                                    priority
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.src = DefaultAvatar.src;
+                                    }}
+                                />
+                                {isEditMode && (
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleProfilePictureChange}
+                                    />
+                                )}
                             </div>
-                        )}
-                    </>
-                )}
+                            <div>
+                                <h1 className="text-3xl font-bold text-black">
+                                    {userData.personalInfo.firstName || 'New'} {userData.personalInfo.lastName || 'User'}
+                                </h1>
+                                <p className="text-black/80">
+                                    {userData.personalInfo.email || 'No email provided'}
+                                </p>
+                                <p className="text-black/60 text-sm mt-1">
+                                    {userData.professionalInfo.career || 'Career'} at {userData.professionalInfo.employment || 'Company'}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={toggleEditMode}
+                                className={`px-4 py-2 ${isEditMode ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg transition duration-300`}
+                            >
+                                {isEditMode ? 'Cancel Edit' : 'Edit Profile'}
+                            </button>
+                            <button 
+                                onClick={handleLogout}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6">
+                    <div className="mb-8">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Personal Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                <input
+                                    type="text"
+                                    value={userData.personalInfo.firstName}
+                                    onChange={(e) => handleChange('personalInfo', 'firstName', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                <input
+                                    type="text"
+                                    value={userData.personalInfo.lastName}
+                                    onChange={(e) => handleChange('personalInfo', 'lastName', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <input
+                                    type="text"
+                                    value={userData.personalInfo.phoneNumber}
+                                    onChange={(e) => handleChange('personalInfo', 'phoneNumber', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">MyKad Number</label>
+                                <input
+                                    type="text"
+                                    value={userData.personalInfo.mykadNumber}
+                                    onChange={(e) => handleChange('personalInfo', 'mykadNumber', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    value={userData.personalInfo.email}
+                                    onChange={(e) => handleChange('personalInfo', 'email', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Race</label>
+                                <input
+                                    type="text"
+                                    value={userData.personalInfo.race}
+                                    onChange={(e) => handleChange('personalInfo', 'race', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                                <input
+                                    type="text"
+                                    value={userData.personalInfo.userId}
+                                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100"
+                                    readOnly
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mb-8">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Address Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                <input
+                                    type="text"
+                                    value={userData.addressInfo.address}
+                                    onChange={(e) => handleChange('addressInfo', 'address', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                                <div className={`flex items-center border border-gray-300 rounded-lg p-3 ${isEditMode ? 'focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500' : 'bg-gray-100'}`}>
+                                    <span className="mr-2">🇲🇾</span>
+                                    <input
+                                        type="text"
+                                        value={userData.addressInfo.country}
+                                        onChange={(e) => handleChange('addressInfo', 'country', e.target.value)}
+                                        className="flex-grow outline-none bg-transparent"
+                                        readOnly={!isEditMode}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Postcode</label>
+                                <input
+                                    type="text"
+                                    value={userData.addressInfo.pinCode}
+                                    onChange={(e) => handleChange('addressInfo', 'pinCode', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Father's Name</label>
+                                <input
+                                    type="text"
+                                    value={userData.addressInfo.fathersName}
+                                    onChange={(e) => handleChange('addressInfo', 'fathersName', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Mother's Name</label>
+                                <input
+                                    type="text"
+                                    value={userData.addressInfo.mothersName}
+                                    onChange={(e) => handleChange('addressInfo', 'mothersName', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                                <input
+                                    type="date"
+                                    value={userData.addressInfo.dateOfBirth}
+                                    onChange={(e) => handleChange('addressInfo', 'dateOfBirth', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Birth Place</label>
+                                <input
+                                    type="text"
+                                    value={userData.addressInfo.birthPlace}
+                                    onChange={(e) => handleChange('addressInfo', 'birthPlace', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mb-8">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Professional Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                                <input
+                                    type="text"
+                                    value={userData.professionalInfo.nation}
+                                    onChange={(e) => handleChange('professionalInfo', 'nation', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+                                <input
+                                    type="text"
+                                    value={userData.professionalInfo.career}
+                                    onChange={(e) => handleChange('professionalInfo', 'career', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Employment</label>
+                                <input
+                                    type="text"
+                                    value={userData.professionalInfo.employment}
+                                    onChange={(e) => handleChange('professionalInfo', 'employment', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Work Address</label>
+                                <input
+                                    type="text"
+                                    value={userData.professionalInfo.workAddress}
+                                    onChange={(e) => handleChange('professionalInfo', 'workAddress', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Additional Information</label>
+                                <input
+                                    type="text"
+                                    value={userData.professionalInfo.additionalInfo}
+                                    onChange={(e) => handleChange('professionalInfo', 'additionalInfo', e.target.value)}
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
+                                    readOnly={!isEditMode}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button
+                            type="submit"
+                            disabled={!isEditMode}
+                            className={`px-6 py-3 font-medium rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 ${
+                                isEditMode 
+                                ? 'bg-yellow-300 text-black hover:bg-yellow-400' 
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                        >
+                            Save Profile
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <Footer />
-
-            <PopupProfile
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                person={selectedPerson}
-            />
         </div>
     );
 }

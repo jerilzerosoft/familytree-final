@@ -1,5 +1,3 @@
-// @typescript-eslint/no-explicit-any
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,7 +5,8 @@ import axios from "axios";
 import Image from "next/image";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
-import { BASE_URL } from "@/app/components/Utils/apis"
+import { BASE_URL } from "@/app/components/Utils/apis";
+
 export default function FamilyGalleryPage() {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -18,15 +17,12 @@ export default function FamilyGalleryPage() {
   useEffect(() => {
     const fetchImages = async (): Promise<void> => {
       try {
-        const response = await axios.get(
-          `${BASE_URL}/admin/gallery/`
-        );
+        const response = await axios.get(`${BASE_URL}/admin/gallery/`);
         console.log("API Response:", response.data);
 
         const imageUrls = response.data.images.map(
           (img: { image: string }) => img.image
         );
-        console.log("Image paths:", imageUrls);
 
         const constructedUrls = imageUrls.map(getImageSource);
         console.log("Full URLs:", constructedUrls);
@@ -43,15 +39,8 @@ export default function FamilyGalleryPage() {
     fetchImages();
   }, []);
 
-  const getImageSource = (imagePath: any) => {
-    if (imagePath) {
-      return `${BASE_URL}${
-        // imagePath.startsWith("/") ? imagePath : "/" + imagePath
-        imagePath
-      }`;
-    } else {
-      return "/default-avatar.png";
-    }
+  const getImageSource = (imagePath: string) => {
+    return imagePath ? `${BASE_URL}${imagePath}` : "/default-avatar.png";
   };
 
   const openImagePreview = (imageSrc: string): void => {
@@ -65,7 +54,8 @@ export default function FamilyGalleryPage() {
   };
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-100 min-h-screen flex flex-col">
+      {/* Header */}
       <div className="text-white text-center inner-banner">
         <Header />
         <div className="flex justify-center items-center">
@@ -73,7 +63,8 @@ export default function FamilyGalleryPage() {
         </div>
       </div>
 
-      <main className="py-16 bg-gray-50">
+      {/* Main Content */}
+      <main className="py-16 bg-gray-50 flex-1">
         <div className="container mx-auto px-4">
           {loading ? (
             <p className="text-center text-gray-500">Loading images...</p>
@@ -105,8 +96,9 @@ export default function FamilyGalleryPage() {
         </div>
       </main>
 
+      {/* Modal */}
       {isModalOpen && selectedImage && (
-        <div className="flex items-center justify-center fixed inset-0 bg-[rgba(10,7,7,0.6)]">
+        <div className="flex items-center justify-center fixed inset-0 bg-[rgba(10,7,7,0.6)] z-50">
           <div className="relative bg-white rounded-lg p-4 shadow-lg max-w-2xl w-full">
             <button
               className="absolute top-4 right-4 bg-gray-200 rounded-full p-2 text-gray-800 hover:bg-gray-300"
@@ -122,7 +114,7 @@ export default function FamilyGalleryPage() {
                   width={800}
                   height={600}
                   style={{ objectFit: "contain" }}
-                  className="w-full h-auto rounded-lg"
+                  className="w-full h-auto rounded-lg z-1"
                 />
               </div>
             </div>
@@ -130,6 +122,7 @@ export default function FamilyGalleryPage() {
         </div>
       )}
 
+      {/* Footer */}
       <Footer />
     </div>
   );

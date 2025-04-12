@@ -15,6 +15,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+const back = () => {
+  router.push('./');
+};
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -59,7 +62,7 @@ const Login = () => {
         <div className="mb-4 flex justify-end">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={back}
             className="text-sm text-gray-600 cursor-pointer hover:text-black transition"
           >
             ← Back

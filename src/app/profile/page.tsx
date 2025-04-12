@@ -1,12 +1,13 @@
-// pages/profile.js
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { UserData } from "@/app/components/Utils/interface";
-import Avator from "@/assets/images/user.png";
-import { BASE_URL } from "@/app/components/Utils/apis"
+import { BASE_URL } from "@/app/components/Utils/apis";
+
+import DefaultAvatar from "@/assets/images/user.png";
+
 export default function ProfilePage() {
     const [userData, setUserData] = useState({
         personalInfo: {
@@ -15,7 +16,7 @@ export default function ProfilePage() {
             phoneNumber: '',
             telephoneNumber: '',
             email: '',
-            avatar: 'Avator',
+            avatar: '',
             mykadNumber: '',
             username: '',
             userRole: '',
@@ -37,13 +38,16 @@ export default function ProfilePage() {
             employment: '',
             workAddress: '',
             additionalInfo: '',
-        },
-        agreeToTerms: false
+        }
     });
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isEditMode, setIsEditMode] = useState(false); // New state to track edit mode
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null); 
+    const fileInputRef = useRef(null);
 
     const handleChange = (
         section: keyof UserData,
@@ -59,11 +63,31 @@ export default function ProfilePage() {
         }));
     };
 
+    
+    const handleProfilePictureChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            
+            setSelectedFile(file);
+            
+        
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
+
     useEffect(() => {
         const loadUserData = async () => {
             setIsLoading(true);
             try {
-                
                 const token = localStorage.getItem('authToken');
                 const userId = localStorage.getItem('userId');
                 
@@ -71,9 +95,7 @@ export default function ProfilePage() {
                     throw new Error('Authentication token not found');
                 }
                 
-                
                 const response = await fetch(`${BASE_URL}/admin/get-profile/${userId}/`, {
-                    // const response = await fetch(`https://api.familytreee.zerosoft.in/admin/get-profile/${userId}/`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -86,18 +108,26 @@ export default function ProfilePage() {
                 }
                 
                 const data = await response.json();
-                
-                
                 const profile = data.profile;
                 
                 if (!profile) {
                     throw new Error('No profile data found');
                 }
                 
-                
                 const nameParts = (profile.full_name || '').split(' ');
                 const firstName = nameParts[0] || '';
                 const lastName = nameParts.slice(1).join(' ') || '';
+
+                
+                let avatarUrl = profile.profile_picture || '';
+                if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:')) {
+                    avatarUrl = `${BASE_URL}${avatarUrl}`;
+                }
+                
+                
+                if (!avatarUrl || avatarUrl.trim() === '') {
+                    avatarUrl = '';
+                }
 
                 setUserData({
                     personalInfo: {
@@ -106,7 +136,7 @@ export default function ProfilePage() {
                         phoneNumber: profile.phone || '',
                         telephoneNumber: profile.phone || '', 
                         email: profile.email || '',
-                        avatar: profile.profile_picture || ' Avator',
+                        avatar: avatarUrl,
                         mykadNumber: profile.mykad_number || '',
                         username: profile.username || '',
                         userRole: profile.user_role || '',
@@ -128,9 +158,13 @@ export default function ProfilePage() {
                         employment: profile.occupation || '', 
                         workAddress: profile.work_address || '',
                         additionalInfo: profile.additional_info || '',
-                    },
-                    agreeToTerms: false
+                    }
                 });
+                
+                
+                if (avatarUrl) {
+                    setImagePreview(avatarUrl);
+                }
             } catch (error) {
                 console.error('Error loading user data:', error);
                 setError(error.message);
@@ -146,63 +180,95 @@ export default function ProfilePage() {
         e.preventDefault();
     
         try {
+            setIsUploading(true);
             const token = localStorage.getItem('authToken');
             const userId = localStorage.getItem('userId');
     
             if (!token || !userId) {
                 throw new Error('Missing authentication or user ID');
             }
+            
+            
+            const formData = new FormData();
+            
+           
+            formData.append('full_name', `${userData.personalInfo.firstName} ${userData.personalInfo.lastName}`);
+            formData.append('email', userData.personalInfo.email);
+            formData.append('phone', userData.personalInfo.phoneNumber);
+            formData.append('home_address', userData.addressInfo.address);
+            formData.append('postcode', userData.addressInfo.pinCode);
+            formData.append('date_of_birth', userData.addressInfo.dateOfBirth);
+            formData.append('place_of_birth', userData.addressInfo.birthPlace);
+            formData.append('nationality', userData.professionalInfo.nation);
+            formData.append('occupation', userData.professionalInfo.career);
+            formData.append('work_address', userData.professionalInfo.workAddress);
+            formData.append('mykad_number', userData.personalInfo.mykadNumber);
+            formData.append('race', userData.personalInfo.race);
+            formData.append('fathers_name', userData.addressInfo.fathersName);
+            formData.append('mothers_name', userData.addressInfo.mothersName);
+            formData.append('additional_info', userData.professionalInfo.additionalInfo);
+            
+           
+            if (selectedFile) {
+                formData.append('profile_picture', selectedFile);
+            } else if (userData.personalInfo.avatar) {
+            
+                formData.append('profile_picture_url', userData.personalInfo.avatar);
+            }
     
-            const apiData = {
-                full_name: `${userData.personalInfo.firstName} ${userData.personalInfo.lastName}`,
-                email: userData.personalInfo.email,
-                phone: userData.personalInfo.phoneNumber,
-                home_address: userData.addressInfo.address,
-                postcode: userData.addressInfo.pinCode,
-                date_of_birth: userData.addressInfo.dateOfBirth,
-                place_of_birth: userData.addressInfo.birthPlace,
-                nationality: userData.professionalInfo.nation,
-                occupation: userData.professionalInfo.career,
-                work_address: userData.professionalInfo.workAddress,
-                mykad_number: userData.personalInfo.mykadNumber,
-                race: userData.personalInfo.race,
-                fathers_name: userData.addressInfo.fathersName,
-                mothers_name: userData.addressInfo.mothersName,
-                additional_info: userData.professionalInfo.additionalInfo,
-                profile_picture: userData.personalInfo.avatar
-            };
-    
+            
             const response = await fetch(`${BASE_URL}/admin/profiles/update/${userId}/`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
+                   
                 },
-                body: JSON.stringify(apiData),
+                body: formData,
             });
     
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to update profile');
             }
+            
+            const data = await response.json();
+            
+            
+            if (data.profile && data.profile.profile_picture) {
+                const newAvatarUrl = data.profile.profile_picture.startsWith('http') ? 
+                    data.profile.profile_picture : 
+                    `${BASE_URL}${data.profile.profile_picture}`;
+                
+                handleChange('personalInfo', 'avatar', newAvatarUrl);
+                setImagePreview(newAvatarUrl);
+            }
     
             alert('Profile updated successfully!');
-            setIsEditMode(false); // Exit edit mode after successful save
+            
+            setSelectedFile(null);
+            setIsEditMode(false); 
         } catch (error: any) {
             console.error('Error updating profile:', error);
             alert(`Failed to update profile: ${error.message}`);
+        } finally {
+            setIsUploading(false);
         }
     };
     
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         sessionStorage.clear();
-        // Redirect to login page
+        
         window.location.href = '/login';
     };
 
-    // New function to toggle edit mode
+    
     const toggleEditMode = () => {
+        if (isEditMode) {
+            
+            setImagePreview(userData.personalInfo.avatar || null);
+            setSelectedFile(null);
+        }
         setIsEditMode(!isEditMode);
     };
 
@@ -240,6 +306,9 @@ export default function ProfilePage() {
         );
     }
 
+    
+    const displayImageSrc = imagePreview || userData.personalInfo.avatar || DefaultAvatar;
+
     return (
         <div className="bg-gray-100">
             <div className="text-white text-center inner-banner">
@@ -253,14 +322,41 @@ export default function ProfilePage() {
                 <div className="p-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                            <div className="relative w-24 h-24 mr-6">
+                            <div 
+                                className="relative w-24 h-24 mr-6 cursor-pointer group"
+                                onClick={isEditMode ? triggerFileInput : null}
+                            >
+                                {isEditMode && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-white text-sm font-medium">Change Photo</span>
+                                    </div>
+                                )}
+                                {isUploading && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full">
+                                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-3 border-white border-t-transparent"></div>
+                                    </div>
+                                )}
                                 <Image
-                                    src={userData.personalInfo.avatar }
+                                    src={displayImageSrc}
                                     alt="Profile"
-                                    layout="fill"
-                                    className="rounded-full border-4 border-white shadow-lg object-cover"
+                                    width={96}
+                                    height={96}
+                                    className="rounded-full border-4 border-white shadow-lg object-cover w-24 h-24"
                                     priority
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.src = DefaultAvatar.src;
+                                    }}
                                 />
+                                {isEditMode && (
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleProfilePictureChange}
+                                    />
+                                )}
                             </div>
                             <div>
                                 <h1 className="text-3xl font-bold text-black">
@@ -270,20 +366,20 @@ export default function ProfilePage() {
                                     {userData.personalInfo.email || 'No email provided'}
                                 </p>
                                 <p className="text-black/60 text-sm mt-1">
-                                    {userData.professionalInfo.career || 'Career'} at {userData.professionalInfo.employment || 'Company'}
+                                    {userData.professionalInfo.career || 'Career'} at {userData.professionalInfo.workAddress || 'Company'}
                                 </p>
                             </div>
                         </div>
                         <div className="flex gap-3">
                             <button 
                                 onClick={toggleEditMode}
-                                className={`px-4 py-2 ${isEditMode ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg transition duration-300`}
+                                className={`px-4 cursor-pointer py-2 ${isEditMode ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg transition duration-300`}
                             >
                                 {isEditMode ? 'Cancel Edit' : 'Edit Profile'}
                             </button>
                             <button 
                                 onClick={handleLogout}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
+                                className="px-4 py-2 cursor-pointer bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
                             >
                                 Logout
                             </button>
@@ -489,7 +585,7 @@ export default function ProfilePage() {
                                     readOnly={!isEditMode}
                                 />
                             </div>
-                            <div className="md:col-span-2">
+                            {/* <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Additional Information</label>
                                 <input
                                     type="text"
@@ -498,33 +594,17 @@ export default function ProfilePage() {
                                     className={`w-full p-3 border border-gray-300 rounded-lg ${isEditMode ? 'focus:ring-2 focus:ring-green-500 focus:border-green-500' : 'bg-gray-100'}`}
                                     readOnly={!isEditMode}
                                 />
-                            </div>
+                            </div> */}
                         </div>
                     </div>
-
-                    {isEditMode && (
-                        <div className="mb-8">
-                            <div className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50">
-                                <input
-                                    type="checkbox"
-                                    checked={userData.agreeToTerms}
-                                    onChange={(e) => handleChange('agreeToTerms', 'agreeToTerms', e.target.checked)}
-                                    className="h-5 w-5 text-green-500 rounded focus:ring-green-500 mr-2"
-                                />
-                                <label className="text-gray-700">
-                                    The above information is correct
-                                </label>
-                            </div>
-                        </div>
-                    )}
 
                     <div className="flex justify-end">
                         <button
                             type="submit"
-                            disabled={!isEditMode || (isEditMode && !userData.agreeToTerms)}
-                            className={`px-6 py-3 font-medium rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 ${
-                                isEditMode && userData.agreeToTerms 
-                                ? 'bg-yellow-300 text-black hover:bg-yellow-400' 
+                            disabled={!isEditMode}
+                            className={`px-6 py-3 font-medium rounded-xl  shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 ${
+                                isEditMode 
+                                ? 'bg-yellow-300 text-black hover:bg-yellow-400 cursor-pointer ' 
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                         >
