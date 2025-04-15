@@ -149,7 +149,7 @@ const handleRequestAccess = async (tabName: string) => {
   
 
   const renderRestrictedContent = (tabName: string) => (
-    <div className="flex flex-col items-center justify-center p-6 border border-blue-300 bg-red-50 rounded-lg">
+    <div className="flex flex-col items-center justify-center p-6 border border-blue-300 rounded-lg">
       <p className="text-center text-lg font-semibold text-blue-600">
         Please contact admin to view this information.
       </p>
