@@ -243,13 +243,13 @@ export default function ProfilePage() {
                 setImagePreview(newAvatarUrl);
             }
     
-            alert('Profile updated successfully!');
+            // alert('Profile updated successfully!');
             
             setSelectedFile(null);
             setIsEditMode(false); 
         } catch (error: any) {
             console.error('Error updating profile:', error);
-            alert(`Failed to update profile: ${error.message}`);
+            // alert(`Failed to update profile: ${error.message}`);
         } finally {
             setIsUploading(false);
         }

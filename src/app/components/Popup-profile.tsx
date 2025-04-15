@@ -107,7 +107,7 @@ const handleRequestAccess = async (tabName: string) => {
 
     if (!userId || !username || !targetUserId) {
       console.error("Missing user info:", { userId, username, targetUserId });
-      alert("Missing user info. Please try logging in again.");
+      // alert("Missing user info. Please try logging in again.");
       return;
     }
 
@@ -126,15 +126,15 @@ const handleRequestAccess = async (tabName: string) => {
 
     if (response.ok) {
       setRequestedTabs(prev => ({ ...prev, [tabName]: true }));
-      alert("Request sent successfully!");
+      // alert("Request sent successfully!");
       await fetchAccessStatus();
     } else {
       console.error("Failed to send request:", result);
-      alert("Failed to send request: " + (result.error || "Unknown error"));
+      // alert("Failed to send request: " + (result.error || "Unknown error"));
     }
   } catch (error) {
     console.error("Error sending request:", error);
-    alert("Error sending request: " + (error as Error).message);
+    // alert("Error sending request: " + (error as Error).message);
   } finally {
     setRequestLoading(false);
   }
