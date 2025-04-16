@@ -72,8 +72,8 @@ const fetchAccessStatus = useCallback(async () => {
         (item: { tab: string }) => item.tab === "additional"
       );
 
-      setTab2Access(personalInfoAccess?.status === "approved");
-      setTab3Access(additionalInfoAccess?.status === "approved");
+      setTab2Access(personalInfoAccess?.status === "Approved");
+      setTab3Access(additionalInfoAccess?.status === "Approved");
       setAccessStatus(res.data.access);
       setLastFetchTime(Date.now());
     } catch (err) {

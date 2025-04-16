@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import Logo from "@/assets/images/logo.png";
 import Search from "@/assets/images/search-icon.png";
 import Galary from "@/assets/images/galary.png";
-import profile from "@/assets/images/user-icon.png";
+import defaultProfile from "@/assets/images/user.png";
+import { BASE_URL } from "@/app/components/Utils/apis";
 
 export default function Header({ onSearch = null }) {
   const router = useRouter();
@@ -19,6 +20,8 @@ export default function Header({ onSearch = null }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -31,10 +34,11 @@ export default function Header({ onSearch = null }) {
       localStorage.removeItem("userEmail");
       localStorage.removeItem("username");
     }
+    setIsLoggedIn(false);
+    setAvatarUrl('');
     router.push("/login"); 
   };
   
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -64,6 +68,54 @@ export default function Header({ onSearch = null }) {
     }
   }, []);
 
+  useEffect(() => {
+    const loadUserData = async () => {
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('authToken');
+        const userId = localStorage.getItem('userId');
+        
+        if (!token || !userId) {
+          throw new Error('Authentication token or userId not found');
+        }
+        
+        const response = await fetch(`${BASE_URL}/admin/get-profile/${userId}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile data');
+        }
+        
+        const data = await response.json();
+        
+        // Set the avatar URL using logic
+        let profilePicture = data.profile?.profile_picture || '';
+        if (profilePicture && !profilePicture.startsWith('http') && !profilePicture.startsWith('data:')) {
+          profilePicture = `${BASE_URL}${profilePicture}`;
+        }
+        
+        if (!profilePicture || profilePicture.trim() === '') {
+          profilePicture = '';
+        }
+        
+        setAvatarUrl(profilePicture);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        setIsLoading(false);
+      }
+    };
+
+    if (isLoggedIn) {
+      loadUserData();
+    }
+  }, [isLoggedIn]);
+
   const handleLogoClick = () => {
     router.push("/");
   };
@@ -76,15 +128,12 @@ export default function Header({ onSearch = null }) {
     const query = searchInputRef.current?.value.trim();
     if (query) {
       if (onSearch && typeof onSearch === 'function') {
-
         onSearch(query);
         setIsSearchOpen(false);
       } else {
-
         localStorage.setItem('headerSearchQuery', query);
         router.push('/familydetails');
       }
-
 
       if (searchInputRef.current) {
         searchInputRef.current.value = "";
@@ -213,9 +262,15 @@ export default function Header({ onSearch = null }) {
                 <>
                   <button
                     onClick={toggleDropdown}
-                    className="bg-white text-black p-2 cursor-pointer rounded-full text-sm shadow-md flex items-center gap-2"
+                    className="bg-white text-black p-2 cursor-pointer rounded-full text-sm shadow-md flex items-center gap-2 h-12"
                   >
-                    <Image src={profile} alt="Profile Icon" width={28} height={28} className="rounded-full" />
+                    <Image 
+                      src={avatarUrl || defaultProfile} 
+                      alt="Profile Icon" 
+                      width={28} 
+                      height={34} 
+                      className="rounded-full" 
+                    />
                   </button>
 
                   {isDropdownOpen && (

@@ -260,7 +260,8 @@ const Home = () => {
         </div>
       </div>
 
-      <section className="py-16 px-4 container mx-auto bg-white">
+      <section className=" bg-white">
+        <div className="container mx-auto py-16 px-4 ">
         <h2 className="text-3xl md:text-4xl font-semibold text-green-700 text-center mb-12">
           {aboutSection.title}
         </h2>
@@ -312,6 +313,7 @@ const Home = () => {
               height={400}
             />
           </div>
+        </div>
         </div>
       </section>
 
