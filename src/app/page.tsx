@@ -255,7 +255,7 @@ const Home = () => {
             </p>
             <div className="mt-6 space-x-4">
               <Link
-                href="/familydetails"
+                href="/familymembers"
                 className="bg-white hover:bg-amber-100 text-black p-4 rounded-full text-sm shadow-md"
               >
                 View Family Members

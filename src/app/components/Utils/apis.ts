@@ -5,16 +5,16 @@ export const BASE_URL =
 import axios from 'axios';
 
 export const getBaseURL = () => {
-  if (typeof window !== 'undefined') {
-      if (window.location.hostname === "localhost") {
-          return 'http://localhost:8000';
-      } else if (window.location.hostname === 'admin.familytreee.zerosoft.in') {
-          return 'https://api.familytreee.zerosoft.in';
-      }
-  }
+    // if (typeof window !== 'undefined') {
+    //     if (window.location.hostname === "localhost") {
+    //         return 'http://localhost:8000';
+    //     } else if (window.location.hostname === 'admin.familytreee.zerosoft.in') {
+    //         return 'https://api.familytreee.zerosoft.in';
+    //     }
+    // }
 
-  
-  return 'http://localhost:8000';
+    // Default fallback for server-side rendering
+    return BASE_URL;
 };
 
 
