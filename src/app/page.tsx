@@ -207,7 +207,7 @@ const Home = () => {
 
   
   const handleFamilyMembers = () => {
-    router.push("/familydetails");
+    router.push("/familymembers");
   }
 
   const handlegallary = () => {

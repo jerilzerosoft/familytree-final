@@ -5,14 +5,18 @@ export const BASE_URL =
 import axios from 'axios';
 
 export const getBaseURL = () => {
-    console.log(window.location.hostname);
-    if (window.location.hostname === 'localhost') {
-        return 'http://localhost:8000';
-    } else if (window.location.hostname === 'admin.familytreee.zerosoft.in') {
-        return 'https://api.familytreee.zerosoft.in';
-    }
-    return 'http://localhost:8000';
+  if (typeof window !== 'undefined') {
+      if (window.location.hostname === "localhost") {
+          return 'http://localhost:8000';
+      } else if (window.location.hostname === 'admin.familytreee.zerosoft.in') {
+          return 'https://api.familytreee.zerosoft.in';
+      }
+  }
+
+  
+  return 'http://localhost:8000';
 };
+
 
 const API = axios.create({
     baseURL: getBaseURL(),

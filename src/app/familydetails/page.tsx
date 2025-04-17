@@ -24,14 +24,14 @@ export default function DetailsPage() {
     const [loading, setLoading] = useState(false);
 
 
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedToken = localStorage.getItem('authToken');
-            setToken(storedToken);
-        }
-    }, []);
-
-
+ 
+useEffect(() => {
+    
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('authToken');
+      setToken(storedToken);
+    }
+  }, []);
     const handleHeaderSearch = (query) => {
         if (query) {
             setNameQuery(query);
@@ -116,7 +116,7 @@ export default function DetailsPage() {
                     }
 
                     if (!avatarUrl || avatarUrl.trim() === '') {
-                        avatarUrl = Avator; // Default avatar image
+                        avatarUrl = Avator; 
                     }
 
                     return {
