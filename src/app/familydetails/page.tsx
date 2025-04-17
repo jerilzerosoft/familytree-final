@@ -256,7 +256,7 @@ export default function DetailsPage() {
                         />
                         <input
                             type="text"
-                            placeholder="Last Name/Email/ID"
+                            placeholder="Last Name/Email"
                             className="w-full sm:w-[calc(50%-8px)] lg:w-1/3 border-1 border-gray-500 rounded-xl h-12 p-2"
                             value={pathQuery}
                             onChange={(e) => setPathQuery(e.target.value)}

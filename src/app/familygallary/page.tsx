@@ -101,7 +101,7 @@ export default function FamilyGalleryPage() {
         <div className="flex items-center justify-center fixed inset-0 bg-[rgba(10,7,7,0.6)] z-50">
           <div className="relative bg-white rounded-lg p-4 shadow-lg max-w-2xl w-full">
             <button
-              className="absolute top-4 right-4 z-1 bg-gray-200 rounded-full p-2 text-gray-800 hover:bg-gray-300"
+              className="absolute top-4 right-4 z-1 cursor-pointer bg-gray-200 rounded-full p-2 text-gray-800 hover:bg-gray-300"
               onClick={closeImagePreview}
             >
               ✕

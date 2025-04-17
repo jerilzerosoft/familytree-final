@@ -5,7 +5,7 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { UserData } from "@/app/components/Utils/interface";
 import { BASE_URL } from "@/app/components/Utils/apis";
-
+import { useRouter } from 'next/navigation';
 import DefaultAvatar from "@/assets/images/user.png";
 
 export default function ProfilePage() {
@@ -48,7 +48,7 @@ export default function ProfilePage() {
     const [isUploading, setIsUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
-
+const router = useRouter();
     const handleChange = (
         section: keyof UserData,
         field: string,
@@ -92,8 +92,10 @@ export default function ProfilePage() {
                 const userId = localStorage.getItem('userId');
 
                 if (!token) {
-                    throw new Error('Authentication token not found');
+                    router.push('/login');
+                    return;
                 }
+                
 
                 const response = await fetch(`${BASE_URL}/admin/get-profile/${userId}/`, {
                     method: 'GET',

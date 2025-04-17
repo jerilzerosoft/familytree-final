@@ -626,7 +626,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
           onClick={onClose}
           className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 transition"
         >
-          <IoCloseSharp className="h-6 w-6" />
+          <IoCloseSharp className="h-6 w-6 cursor-pointer " />
         </button>
 
         <div className="flex items-center p-4 mb-4">

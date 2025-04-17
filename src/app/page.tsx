@@ -105,7 +105,7 @@ const Home = () => {
   const [features, setFeatures] = useState(staticData.features);
   const [gallerySection, setGallerySection] = useState(staticData.gallery);
   const [galleryFeatures, setGalleryFeatures] = useState(staticData.galleryFeatures);
-
+  const [showLoginModal, setShowLoginModal] = useState(false);
   
   useEffect(() => {
     
@@ -205,15 +205,19 @@ const Home = () => {
     }
   };
 
-  const handlegallary = () => {
-    router.push("/familygallary");
-  }
   
   const handleFamilyMembers = () => {
     router.push("/familydetails");
   }
 
-  
+  const handlegallary = () => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      router.push("/familygallary");
+    } else {
+      setShowLoginModal(true);
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -228,7 +232,8 @@ const Home = () => {
   }
 
   return (
-    <div className="bg-gray-100">
+    <>
+      <div className="bg-gray-100">
       {!isOnline && (
         <div className="bg-yellow-100 text-yellow-800 px-4 py-2 text-center">
           You are currently offline. Showing local content.
@@ -375,6 +380,29 @@ const Home = () => {
 
       <Footer />
     </div>
+    {showLoginModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-[rgba(10,7,7,0.6)]">
+          <div className="bg-white rounded-lg p-6 w-[300px] text-center shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">Please log in</h2>
+            <p className="mb-6 text-sm text-gray-600">You need to log in to access the gallery.</p>
+            <button
+              onClick={() => router.push("/login")}
+              className="bg-green-600 text-white px-4 cursor-pointer py-2 rounded hover:bg-green-700 w-full mb-2"
+            >
+              Go to Login
+            </button>
+
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="text-gray-500 cursor-pointer text-sm hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  
   );
 };
 
