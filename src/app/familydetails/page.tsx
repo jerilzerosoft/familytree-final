@@ -83,25 +83,20 @@ export default function DetailsPage() {
             }
         }
     }, []);
-
+   
    
     const fetchProfiles = async (name = nameQuery, path = pathQuery) => {
         setLoading(true);
         try {
-            
             const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-            
+    
             let url = `${BASE_URL}/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
-
+    
             if (name || path) {
-                if (name && path) {
-                    url += `&search=${encodeURIComponent(`${name} ${path}`)}`;
-                } else {
-                    const searchTerm = name || path;
-                    url += `&search=${encodeURIComponent(searchTerm)}`;
-                }
+                const searchTerm = name && path ? `${name} ${path}` : name || path;
+                url += `&search=${encodeURIComponent(searchTerm)}`;
             }
-
+    
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -109,44 +104,58 @@ export default function DetailsPage() {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-
+    
             const data = await response.json();
-
+    
             if (response.ok) {
-                setResults(data.profiles.map((profile: any) => ({
-                    id: profile.id,
-                    user_id: profile.user_id,
-                    name: profile.full_name,
-                    phone: profile.phone || "N/A",
-                    email: profile.email,
-                    avatar: profile.profile_picture || Avator,
-                    date_of_birth: profile.date_of_birth || "N/A",
-                    place_of_birth: profile.place_of_birth || "N/A",
-                    address: profile.home_address || "N/A",
-                    country: profile.nationality || "N/A",
-                    pin_code: profile.postcode || "N/A",
-                    fathers_name: profile.fathers_name || "N/A",
-                    mothers_name: profile.mothers_name || "N/A",
-                    nation: profile.nationality || "N/A",
-                    career: profile.occupation || "N/A",
-                    employment: profile.occupation || "N/A",
-                    work_address: profile.work_address || "N/A",
-                    additional_info: profile.additional_info || "N/A",
-                    mykad_number: profile.mykad_number
-                })));
-
+                const profiles = data.profiles.map((profile: any) => {
+                    let avatarUrl = profile.profile_picture || '';
+                    
+                    if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:')) {
+                        avatarUrl = `${BASE_URL}${avatarUrl}`;
+                    }
+    
+                    if (!avatarUrl || avatarUrl.trim() === '') {
+                        avatarUrl = Avator; // Default avatar image
+                    }
+    
+                    return {
+                        id: profile.id,
+                        user_id: profile.user_id,
+                        name: profile.full_name,
+                        phone: profile.phone || "N/A",
+                        email: profile.email,
+                        avatar: avatarUrl,
+                        date_of_birth: profile.date_of_birth || "N/A",
+                        place_of_birth: profile.place_of_birth || "N/A",
+                        address: profile.home_address || "N/A",
+                        country: profile.nationality || "N/A",
+                        pin_code: profile.postcode || "N/A",
+                        fathers_name: profile.fathers_name || "N/A",
+                        mothers_name: profile.mothers_name || "N/A",
+                        nation: profile.nationality || "N/A",
+                        career: profile.occupation || "N/A",
+                        employment: profile.occupation || "N/A",
+                        work_address: profile.work_address || "N/A",
+                        additional_info: profile.additional_info || "N/A",
+                        mykad_number: profile.mykad_number
+                    };
+                });
+    
+                setResults(profiles);
                 setTotalPages(data.pagination.total_pages);
                 setTotalItems(data.pagination.total_items);
             } else {
                 console.error("Failed to fetch profiles:", data.error);
             }
+    
         } catch (error) {
             console.error("Error fetching profiles:", error);
         } finally {
             setLoading(false);
         }
     };
-
+    
     
     const handleSearch = () => {
         setCurrentPage(1);
