@@ -47,9 +47,14 @@ export default function ProfilePage() {
     const [imagePreview, setImagePreview] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
-    const [haveToken, setHaveToken] = useState(localStorage.getItem('authToken') !== null);
+    const [haveToken, setHaveToken] = useState(false);
     const fileInputRef = useRef(null);
     const router = useRouter();
+
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        setHaveToken(token !== null);
+      }, []);
     const handleChange = (
         section: keyof UserData,
         field: string,
