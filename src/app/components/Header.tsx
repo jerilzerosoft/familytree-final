@@ -126,20 +126,30 @@ export default function Header({ onSearch = null }) {
 
   const handleSearchSubmit = () => {
     const query = searchInputRef.current?.value.trim();
+    const token = localStorage.getItem("authToken");
+  
+    if (!token) {
+      router.push("/login"); 
+      return;
+    }
+  
     if (query) {
-      if (onSearch && typeof onSearch === 'function') {
+      if (onSearch && typeof onSearch === "function") {
         onSearch(query);
         setIsSearchOpen(false);
       } else {
-        localStorage.setItem('headerSearchQuery', query);
-        router.push('/familydetails');
+        localStorage.setItem("headerSearchQuery", query);
+        router.push("/familydetails");
       }
-
+  
       if (searchInputRef.current) {
         searchInputRef.current.value = "";
       }
     }
   };
+  
+
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
