@@ -900,7 +900,7 @@ const PopupProfile: React.FC<PopupProfileProps> = ({
                     <input
                       id="employment"
                       type="text"
-                      value={person.employment || ''}
+                      value={person.work_address || ''}
                       readOnly
                       className="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-green-500"
                       placeholder="Employment"

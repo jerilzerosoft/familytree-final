@@ -73,3 +73,406 @@ body {
   font-family: 'Poppins', sans-serif;
   background-color: var(--background-color);
 }
+
+
+/* Modern Family Tree CSS */
+
+/* Main Container */
+.family-tree-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Header */
+.tree-header {
+  /* background: linear-gradient(to right, #6366f1, #8b5cf6); */
+  color: black;
+  padding: 1.5rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.details-toggle {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* background-color: rgba(255, 255, 255, 0.15); */
+  background-color: rgb(31, 161, 64);
+  color: white;
+  cursor: pointer;
+}
+
+.details-toggle:hover {
+  background-color: rgb(50, 221, 93);
+}
+
+.details-toggle.active {
+  background-color: rgb(50, 221, 93);
+  color: white;
+}
+
+/* Tree Body */
+.tree-body {
+  padding: 1.5rem;
+  background-color: #fff;
+  border-top: 1px solid #f3f4f6;
+}
+
+.tree-content {
+  background-color: #f9fafb;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  overflow: auto;
+  padding: 1rem;
+}
+
+/* Family Tree Container */
+.family-tree-container {
+  padding: 1.5rem;
+}
+
+/* Person Cards */
+.person-card {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.person-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.person-card.male {
+  background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+  border: 1px solid #bfdbfe;
+}
+
+.person-card.female {
+  background: linear-gradient(135deg, #fce7f3, #fae8ff);
+  border: 1px solid #fbcfe8;
+}
+
+.person-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.person-identity {
+  display: flex;
+  align-items: center;
+}
+
+.person-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+}
+
+.male-avatar {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #2563eb;
+}
+
+.female-avatar {
+  background-color: rgba(236, 72, 153, 0.2);
+  color: #db2777;
+}
+
+.person-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.expand-button {
+  padding: 0.25rem;
+  border-radius: 50%;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  transition: background-color 0.2s;
+}
+
+.expand-button:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Person Details */
+.person-details {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.detail-item svg {
+  margin-right: 0.5rem;
+  opacity: 0.7;
+}
+
+/* Marriage Connector */
+.marriage-connector {
+  position: relative;
+  padding: 0 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.connector-line {
+  border-top: 2px solid #d1d5db;
+  width: 2rem;
+  position: absolute;
+}
+
+.connector-heart {
+  background-color: white;
+  z-index: 10;
+  padding: 0.25rem;
+  border-radius: 50%;
+  border: 1px solid #f43f5e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f43f5e;
+}
+
+/* Couple Container */
+.couple-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.spouse-card {
+  flex: 1;
+}
+
+/* Children Tree */
+.children-tree {
+  margin-left: 3rem;
+  position: relative;
+}
+
+.vertical-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-left: 2px solid #d1d5db;
+}
+
+.child-branch {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.horizontal-line {
+  position: absolute;
+  top: 1.5rem;
+  left: 0;
+  width: 2rem;
+  border-top: 2px solid #d1d5db;
+}
+
+.child-content {
+  padding-left: 2.5rem;
+}
+
+.child-card {
+  margin-bottom: 0.5rem;
+}
+
+.child-marriages {
+  margin-top: 1rem;
+}
+
+/* Parents Container */
+.parents-container {
+  margin-bottom: 2rem;
+}
+
+.parent-child-connector {
+  display: flex;
+  justify-content: center;
+}
+
+.connector-vertical {
+  height: 2.5rem;
+  border-left: 2px solid #d1d5db;
+}
+
+/* Marriages Container */
+.marriages-container {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.marriage-unit {
+  position: relative;
+}
+
+/* Children Counter */
+.children-counter {
+  margin-left: 3rem;
+  padding-left: 2rem;
+  padding-top: 0.5rem;
+}
+
+.counter-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+
+.counter-badge svg {
+  margin-right: 0.5rem;
+  color: #6b7280;
+}
+
+/* Siblings Section */
+.siblings-container {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.siblings-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.siblings-header svg {
+  margin-right: 0.5rem;
+  color: #6b7280;
+}
+
+.siblings-header h3 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #4b5563;
+  margin: 0;
+  margin-right: 0.5rem;
+}
+
+.siblings-count {
+  padding: 0.25rem 0.5rem;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+}
+
+.siblings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.sibling-card {
+  min-width: 0;
+}
+
+/* Main Person */
+.main-person {
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .couple-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+  }
+
+  .marriage-connector {
+      width: 100%;
+      padding: 0.5rem 0;
+  }
+
+  .connector-line {
+      width: 100%;
+  }
+
+  .siblings-grid {
+      grid-template-columns: 1fr;
+  }
+}
+
+.loading-container,
+.error-container,
+.no-data-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  width: 100%;
+  gap: 16px;
+  color: #495057;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.error-icon,
+.no-data-icon {
+  font-size: 48px;
+}
+
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+
+  100% {
+      transform: rotate(360deg);
+  }
+}
