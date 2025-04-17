@@ -228,12 +228,12 @@ export default function Header({ onSearch = null }) {
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search..."
-                  className="w-full h-8 text-black focus:outline-none text-sm pr-8 pl-2 rounded-full h-12"
+                  className="w-full  text-black focus:outline-none text-sm pr-8 pl-2 rounded-full h-12"
                   onKeyPress={handleKeyPress}
                 />
 
                 <div
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer "
                   onClick={handleSearchSubmit}
                 >
                   <Image
@@ -246,7 +246,7 @@ export default function Header({ onSearch = null }) {
               </div>
             </div>
 
-            <div className="header-icon hover:bg-white/20 h-10 w-10 rounded-full flex items-center justify-center">
+            <div className="header-icon cursor-pointer hover:bg-white/20 h-10 w-10 rounded-full flex items-center justify-center">
               <Image
                 onClick={handlegallary}
                 src={Galary}

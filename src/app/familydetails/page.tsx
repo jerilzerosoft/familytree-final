@@ -23,7 +23,7 @@ export default function DetailsPage() {
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const storedToken = localStorage.getItem('authToken');
@@ -31,7 +31,7 @@ export default function DetailsPage() {
         }
     }, []);
 
-    
+
     const handleHeaderSearch = (query) => {
         if (query) {
             setNameQuery(query);
@@ -41,7 +41,7 @@ export default function DetailsPage() {
         }
     };
 
-    
+
     const debounce = (func: Function, delay: number) => {
         let timeoutId: NodeJS.Timeout;
         return (...args: any[]) => {
@@ -50,7 +50,7 @@ export default function DetailsPage() {
         };
     };
 
-    
+
     const debouncedSearch = useCallback(
         debounce(() => {
             setCurrentPage(1);
@@ -59,19 +59,19 @@ export default function DetailsPage() {
         [nameQuery, pathQuery]
     );
 
-    
+
     useEffect(() => {
         if (nameQuery !== '' || pathQuery !== '') {
             debouncedSearch();
         }
     }, [nameQuery, pathQuery, debouncedSearch]);
 
-    
+
     useEffect(() => {
         fetchProfiles(nameQuery, pathQuery);
     }, [currentPage, pageSize]);
 
-    
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const storedQuery = localStorage.getItem('headerSearchQuery');
@@ -83,20 +83,20 @@ export default function DetailsPage() {
             }
         }
     }, []);
-   
-   
+
+
     const fetchProfiles = async (name = nameQuery, path = pathQuery) => {
         setLoading(true);
         try {
             const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-    
+
             let url = `${BASE_URL}/admin/get-profiles/?page=${currentPage}&size=${pageSize}`;
-    
+
             if (name || path) {
                 const searchTerm = name && path ? `${name} ${path}` : name || path;
                 url += `&search=${encodeURIComponent(searchTerm)}`;
             }
-    
+
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -104,21 +104,21 @@ export default function DetailsPage() {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 const profiles = data.profiles.map((profile: any) => {
                     let avatarUrl = profile.profile_picture || '';
-                    
+
                     if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:')) {
                         avatarUrl = `${BASE_URL}${avatarUrl}`;
                     }
-    
+
                     if (!avatarUrl || avatarUrl.trim() === '') {
                         avatarUrl = Avator; // Default avatar image
                     }
-    
+
                     return {
                         id: profile.id,
                         user_id: profile.user_id,
@@ -141,28 +141,28 @@ export default function DetailsPage() {
                         mykad_number: profile.mykad_number
                     };
                 });
-    
+
                 setResults(profiles);
                 setTotalPages(data.pagination.total_pages);
                 setTotalItems(data.pagination.total_items);
             } else {
                 console.error("Failed to fetch profiles:", data.error);
             }
-    
+
         } catch (error) {
             console.error("Error fetching profiles:", error);
         } finally {
             setLoading(false);
         }
     };
-    
-    
+
+
     const handleSearch = () => {
         setCurrentPage(1);
         fetchProfiles(nameQuery, pathQuery);
     };
 
-    
+
     const handleReset = () => {
         setNameQuery('');
         setPathQuery('');
@@ -170,25 +170,25 @@ export default function DetailsPage() {
         fetchProfiles('', '');
     };
 
-    
+
     const openModal = (person: Person): void => {
         setSelectedPerson(person);
         setIsModalOpen(true);
     };
 
-    
+
     const closeModal = () => {
         setIsModalOpen(false);
     };
 
-    
+
     const handlePageChange = (newPage: number) => {
         if (newPage > 0 && newPage <= totalPages) {
             setCurrentPage(newPage);
         }
     };
 
-    
+
     const renderPagination = () => {
         const pages = [];
 
@@ -238,7 +238,7 @@ export default function DetailsPage() {
                 <Header onSearch={handleHeaderSearch} />
                 <div className="flex justify-center items-center">
                     <h1 className="text-2xl md:text-3xl lg:text-5xl font-bold shadow-md">
-                        Search Family Members
+                        Family Members
                     </h1>
                 </div>
             </div>

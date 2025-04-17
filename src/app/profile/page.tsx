@@ -47,8 +47,9 @@ export default function ProfilePage() {
     const [imagePreview, setImagePreview] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [haveToken, setHaveToken] = useState(localStorage.getItem('authToken') !== null);
     const fileInputRef = useRef(null);
-const router = useRouter();
+    const router = useRouter();
     const handleChange = (
         section: keyof UserData,
         field: string,
@@ -95,7 +96,7 @@ const router = useRouter();
                     router.push('/login');
                     return;
                 }
-                
+
 
                 const response = await fetch(`${BASE_URL}/admin/get-profile/${userId}/`, {
                     method: 'GET',
@@ -274,7 +275,7 @@ const router = useRouter();
         setIsEditMode(!isEditMode);
     };
 
-    if (isLoading) {
+    if (isLoading || !haveToken) {
         return (
             <div className="min-h-screen flex justify-center items-center bg-gray-100">
                 <div className="text-center">
@@ -321,17 +322,19 @@ const router = useRouter();
             </div>
 
             <div className="container mx-auto mt-12 overflow-hidden">
-                <div className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
+                <div className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center">
                             <div
-                                className="relative w-24 h-24 mr-6 group"
+                                className="relative w-24 h-24 mb-4 sm:mb-0 sm:mr-6 group self-center sm:self-start"
                                 onClick={isEditMode ? triggerFileInput : null}
                             >
                                 {/* Overlay text */}
                                 {isEditMode && (
                                     <div className="absolute inset-0 cursor-pointer bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <span className="text-white text-sm font-medium text-center">Change Photo</span>
+                                        <span className="text-white text-sm font-medium text-center">
+                                            Change Photo
+                                        </span>
                                     </div>
                                 )}
                                 {isUploading && (
@@ -361,28 +364,33 @@ const router = useRouter();
                                     />
                                 )}
                             </div>
-                            <div>
-                                <h1 className="text-3xl font-bold text-black">
-                                    {userData.personalInfo.firstName || 'New'} {userData.personalInfo.lastName || 'User'}
+                            <div className="text-center sm:text-left">
+                                <h1 className="text-2xl sm:text-3xl font-bold text-black">
+                                    {userData.personalInfo.firstName || 'New'}{' '}
+                                    {userData.personalInfo.lastName || 'User'}
                                 </h1>
                                 <p className="text-black/80">
                                     {userData.personalInfo.email || 'No email provided'}
                                 </p>
                                 <p className="text-black/60 text-sm mt-1">
-                                    {userData.professionalInfo.career || 'Career'} at {userData.professionalInfo.workAddress || 'Company'}
+                                    {userData.professionalInfo.career || 'Career'} at{' '}
+                                    {userData.professionalInfo.workAddress || 'Company'}
                                 </p>
                             </div>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3 items-center sm:items-end">
                             <button
                                 onClick={toggleEditMode}
-                                className={`px-4 cursor-pointer py-2 ${isEditMode ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg transition duration-300`}
+                                className={`w-full sm:w-auto px-4 py-2 cursor-pointer ${isEditMode
+                                        ? 'bg-green-500 hover:bg-green-600'
+                                        : 'bg-blue-500 hover:bg-blue-600'
+                                    } text-white rounded-lg transition duration-300`}
                             >
                                 {isEditMode ? 'Cancel Edit' : 'Edit Profile'}
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="px-4 py-2 cursor-pointer bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
+                                className="w-full sm:w-auto px-4 py-2 cursor-pointer bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
                             >
                                 Logout
                             </button>
@@ -482,7 +490,7 @@ const router = useRouter();
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                                 <div className={`flex items-center border border-gray-300 rounded-lg p-3 ${isEditMode ? 'focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500' : 'bg-gray-100'}`}>
-                                    <span className="mr-2">🇲🇾</span>
+                                    {/* <span className="mr-2">🇲🇾</span> */}
                                     <input
                                         type="text"
                                         value={userData.addressInfo.country}
@@ -606,8 +614,8 @@ const router = useRouter();
                             type="submit"
                             disabled={!isEditMode}
                             className={`px-6 py-3 font-medium rounded-xl  shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 ${isEditMode
-                                    ? 'bg-yellow-300 text-black hover:bg-yellow-400 cursor-pointer '
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                ? 'bg-yellow-300 text-black hover:bg-yellow-400 cursor-pointer '
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 }`}
                         >
                             Save Profile
